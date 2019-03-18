@@ -10,7 +10,15 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import { Link } from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
+//import pages
+import Dashboard from '../components/pages/Dashboard';
+import Kehadiran from '../components/pages/Kehadiran';
+import Perkembangan from '../components/pages/Perkembangan';
+import Pembayaran from '../components/pages/Pembayaran';
+
+import Login from '../components/LogIn';
+import SignIn from '../components/SignIn';
 
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
@@ -26,14 +34,14 @@ import HomeIcon from '@material-ui/icons/Dashboard';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
 import AlmasLogo from '../media/logo-almastutoring-main.png';
 
-const drawerWidth = 240;
+const drawerWidth = 220;
 
 const styles = theme => ({
   root: {
     display: 'flex',
   },
   grow: {
-    flexGrow: 1,
+    flexGrow: 0.96,
   },
   appBar: {
     transition: theme.transitions.create(['margin', 'width'], {
@@ -55,9 +63,9 @@ const styles = theme => ({
     marginRight: 20,
   },
 
-  loginButton: {
-    marginRight: 20,
-  },
+  // loginButton: {
+  //   paddingRight: 20,
+  // },
   hide: {
     display: 'none',
   },
@@ -84,7 +92,7 @@ const styles = theme => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: -drawerWidth,
-    background: '#7CDBD5',
+    background: '#FAFAFA',
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
@@ -139,8 +147,8 @@ class PersistentDrawerLeft extends React.Component {
               E-Rapor
             </Typography>
             <div className={classes.grow}></div>
-            <Button color="inherit" className={classes.loginButton}>Masuk</Button>
-            <Button color="inherit" className={classes.loginButton}>Daftar</Button>
+            <Login />
+            <SignIn />
           </Toolbar>
         </AppBar>
         <Drawer
@@ -182,11 +190,19 @@ class PersistentDrawerLeft extends React.Component {
             </List>            
         </Drawer>
         
-          <main
-            className={classNames(classes.content, )}
-          >
-          {/* <div className={classes.drawerHeader} />                        */}
-          </main>
+        <main
+          className={classNames(classes.content, {
+            [classes.contentShift]: open,
+          })}
+        >
+          <div className={classes.drawerHeader} />
+          <Switch>
+            <Route exact path='/' component={Dashboard} />
+            <Route path ='/kehadiran' component={Kehadiran} />
+            <Route path ='/perkembangan' component={Perkembangan} />
+            <Route path ='/pembayaran' component={Pembayaran} />
+          </Switch>
+        </main>
       </div>
     );
   }

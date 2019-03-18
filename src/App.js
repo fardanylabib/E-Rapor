@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import PersistentDrawerLeft from './components/PersistentDrawerLeft';
-import Content from './components/Content';
 import BrowserRouter from 'react-router-dom/BrowserRouter';
 
 
@@ -11,9 +10,9 @@ class App extends Component {
     return (
       <div className="App">
       
-        <PersistentDrawerLeft/>
+        
         <BrowserRouter>
-          <Content/>
+          <PersistentDrawerLeft/>
         </BrowserRouter>
         
         {/* <Carousel>
