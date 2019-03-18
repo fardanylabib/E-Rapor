@@ -31,3 +31,25 @@
     transform: rotate(360deg);
   }
 }
+
+.Title {
+  padding-top:300px;
+  position: relative;
+  text-align:center;
+  color:#ffffff;
+}
+
+.Slide1{
+  height:650px;
+  background-image:url('./media/PhysicsFundamental.jpg');
+}
+
+.Slide2{
+  height:650px;
+  background-image:url('./media/JuaraFisika2.jpg');
+}
+
+.Slide3{
+  height:650px;
+  background-image:url('./media/ELearning2.jpg');
+}

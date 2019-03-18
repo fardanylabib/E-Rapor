@@ -1,25 +1,33 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import PersistentDrawerLeft from './components/PersistentDrawerLeft';
+import Content from './components/Content';
+import BrowserRouter from 'react-router-dom/BrowserRouter';
+
 
 class App extends Component {
   render() {
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      
+        <PersistentDrawerLeft/>
+        <BrowserRouter>
+          <Content/>
+        </BrowserRouter>
+        
+        {/* <Carousel>
+          <div className="Slide1">
+
+            <h2 className="Title">Bandul tumbukan</h2>
+          </div>
+          <div className="Slide2">
+            <h2 className="Title">Juara Fisika</h2>
+          </div>
+          <div className="Slide3">
+            <h2 className="Title">Online Courses</h2>
+          </div>
+        </Carousel> */}
       </div>
     );
   }

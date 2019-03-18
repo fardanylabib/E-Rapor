@@ -51,13 +51,16 @@ export function register(config) {
         registerValidSW(swUrl, config);
       }
     });
+  }else{
+    console.log("wont register SW");
   }
 }
 
 function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
-    .then(registration => {
+    .then(registration => { 
+      console.log("SW is registered");
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
