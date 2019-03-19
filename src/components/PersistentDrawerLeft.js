@@ -21,7 +21,7 @@ import Login from '../components/LogIn';
 import SignIn from '../components/SignIn';
 
 import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Button';
+
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -30,8 +30,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HowToRegIcon from '@material-ui/icons/HowToReg';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
-import HomeIcon from '@material-ui/icons/Dashboard';
+import HomeIcon from '@material-ui/icons/Home';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
+import DownloadIcon from '@material-ui/icons/CloudDownload';
+
 import AlmasLogo from '../media/logo-almastutoring-main.png';
 
 const drawerWidth = 220;
@@ -109,6 +111,7 @@ function ListItemLink(props) {
 }
 
 class PersistentDrawerLeft extends React.Component {
+  
   state = {
     open: false,
   };
@@ -120,6 +123,10 @@ class PersistentDrawerLeft extends React.Component {
   handleDrawerClose = () => {
     this.setState({ open: false });
   };
+
+  // handleClickList = () => {
+  //   this.props.sendFunction;
+  // };
 
   render() {
     const { classes, theme } = this.props;
@@ -143,10 +150,10 @@ class PersistentDrawerLeft extends React.Component {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" color="inherit" noWrap>
+            <Typography variant="h6" color="inherit" align="left" noWrap className={classes.grow}>
               E-Rapor
             </Typography>
-            <div className={classes.grow}></div>
+            {/* <div className={classes.grow}></div> */}
             <Login />
             <SignIn />
           </Toolbar>
@@ -161,7 +168,7 @@ class PersistentDrawerLeft extends React.Component {
           }}
         >
           <div className={classes.drawerHeader}>
-            <img src={AlmasLogo} alt="HTML5 Icon" width="150"></img>
+            <a href="https://almastutoring.com"><img src={AlmasLogo} alt="HTML5 Icon" width="150"/></a>
             <IconButton onClick={this.handleDrawerClose}>
               {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
             </IconButton>
@@ -170,7 +177,7 @@ class PersistentDrawerLeft extends React.Component {
             <List>
               <ListItemLink href='/'>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
-                <ListItemText primary="Dashboard" />
+                <ListItemText primary="Home" />
               </ListItemLink>
             
               <ListItemLink href ='/kehadiran'>
@@ -187,6 +194,10 @@ class PersistentDrawerLeft extends React.Component {
                 <ListItemIcon><MoneyIcon /></ListItemIcon>
                 <ListItemText primary="Pembayaran" />
               </ListItemLink>
+              <ListItem button>
+                <ListItemIcon><DownloadIcon /></ListItemIcon>
+                <ListItemText primary="Download" />
+              </ListItem>
             </List>            
         </Drawer>
         
