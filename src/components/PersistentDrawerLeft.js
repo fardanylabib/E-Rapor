@@ -10,7 +10,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import {Route, Switch} from 'react-router-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 //import pages
 import Dashboard from '../components/pages/Dashboard';
 import Kehadiran from '../components/pages/Kehadiran';
@@ -108,7 +108,7 @@ const styles = theme => ({
 });
 
 function ListItemLink(props) {
-  return <ListItem component='a' {...props} button/>;
+  return <ListItem component={Link} {...props} button/>;
 }
 
 class PersistentDrawerLeft extends React.Component {
@@ -176,22 +176,22 @@ class PersistentDrawerLeft extends React.Component {
           </div>
           
             <List>
-              <ListItemLink href='/'>
+              <ListItemLink to='/'>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItemLink>
             
-              <ListItemLink href ='/kehadiran'>
+              <ListItemLink to='/kehadiran'>
                 <ListItemIcon><HowToRegIcon /></ListItemIcon>
                 <ListItemText primary="Kehadiran" />
               </ListItemLink>
             
-              <ListItemLink href ='/perkembangan' >
+              <ListItemLink to='/perkembangan' >
                 <ListItemIcon><TrendingUpIcon /></ListItemIcon>
                 <ListItemText primary="Perkembangan" />
               </ListItemLink>
   
-              <ListItemLink href='/pembayaran'>
+              <ListItemLink to='/pembayaran'>
                 <ListItemIcon><MoneyIcon /></ListItemIcon>
                 <ListItemText primary="Pembayaran" />
               </ListItemLink>
