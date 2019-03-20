@@ -28,13 +28,14 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+
 import HowToRegIcon from '@material-ui/icons/HowToReg';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import HomeIcon from '@material-ui/icons/Home';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 
-import AlmasLogo from '../media/logo-almastutoring-main.png';
+import AlmasLogo from '../media/logo-almastutoring.png';
 
 const drawerWidth = 220;
 

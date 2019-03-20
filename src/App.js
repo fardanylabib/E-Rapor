@@ -15,18 +15,6 @@ class App extends Component {
           <PersistentDrawerLeft/>
         </BrowserRouter>
         
-        {/* <Carousel>
-          <div className="Slide1">
-
-            <h2 className="Title">Bandul tumbukan</h2>
-          </div>
-          <div className="Slide2">
-            <h2 className="Title">Juara Fisika</h2>
-          </div>
-          <div className="Slide3">
-            <h2 className="Title">Online Courses</h2>
-          </div>
-        </Carousel> */}
       </div>
     );
   }

@@ -8,14 +8,16 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
-    "bootstrap": "^4.3.1",
+    "firebase": "^5.9.0",
     "node-sass": "^4.11.0",
     "nuka-carousel": "^4.4.8",
     "react": "^16.8.3",
+    "react-auth-firebase": "^1.2.1",
     "react-bootstrap": "^1.0.0-beta.5",
     "react-dom": "^16.8.3",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.5"
+    "react-scripts": "2.1.5",
+    "react-with-firebase-auth": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -31,5 +33,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "bootstrap": "^4.3.1"
+  }
 }

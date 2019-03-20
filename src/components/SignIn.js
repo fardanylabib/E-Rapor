@@ -102,7 +102,7 @@ class SignIn extends React.Component {
               Cancel
             </Button>
             <Button onClick={this.handleClose} className={classes.okbutton} variant="contained" size="large">
-              Sign In
+              Sign Up
             </Button>
           </DialogActions>
         </Dialog>
