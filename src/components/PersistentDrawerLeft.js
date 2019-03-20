@@ -1,6 +1,7 @@
 // '#81ecec' 
 //  '#2d3436'
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -180,13 +181,15 @@ class PersistentDrawerLeft extends React.Component {
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItemLink>
+
+              <Link to='/kehadiran'>
+                <ListItemLink>
+                  <ListItemIcon><HowToRegIcon /></ListItemIcon>
+                  <ListItemText primary="Kehadiran" />
+                </ListItemLink>
+              </Link>
             
-              <ListItemLink href ='/kehadiran'>
-                <ListItemIcon><HowToRegIcon /></ListItemIcon>
-                <ListItemText primary="Kehadiran" />
-              </ListItemLink>
-            
-              <ListItemLink href ='/perkembangan' >
+              <ListItemLink href='/perkembangan' >
                 <ListItemIcon><TrendingUpIcon /></ListItemIcon>
                 <ListItemText primary="Perkembangan" />
               </ListItemLink>
