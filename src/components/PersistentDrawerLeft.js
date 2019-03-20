@@ -1,7 +1,6 @@
 // '#81ecec' 
 //  '#2d3436'
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -11,7 +10,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import {Route, Switch} from 'react-router-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 //import pages
 import Dashboard from '../components/pages/Dashboard';
 import Kehadiran from '../components/pages/Kehadiran';
@@ -109,7 +108,7 @@ const styles = theme => ({
 });
 
 function ListItemLink(props) {
-  return <ListItem component='a' {...props} button/>;
+  return <ListItem component={Link} {...props} button/>;
 }
 
 class PersistentDrawerLeft extends React.Component {
@@ -177,24 +176,21 @@ class PersistentDrawerLeft extends React.Component {
           </div>
           
             <List>
-              <ListItemLink href='/'>
+              <ListItemLink to='/'>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItemLink>
-
-              <Link to='/kehadiran'>
-                <ListItemLink>
-                  <ListItemIcon><HowToRegIcon /></ListItemIcon>
-                  <ListItemText primary="Kehadiran" />
-                </ListItemLink>
-              </Link>
-            
-              <ListItemLink href='/perkembangan' >
+              
+              <ListItemLink to='/kehadiran'>
+                <ListItemIcon><HowToRegIcon /></ListItemIcon>
+                <ListItemText primary="Kehadiran" />
+              </ListItemLink>
+              <ListItemLink to='/perkembangan' >
                 <ListItemIcon><TrendingUpIcon /></ListItemIcon>
                 <ListItemText primary="Perkembangan" />
               </ListItemLink>
   
-              <ListItemLink href='/pembayaran'>
+              <ListItemLink to='/pembayaran'>
                 <ListItemIcon><MoneyIcon /></ListItemIcon>
                 <ListItemText primary="Pembayaran" />
               </ListItemLink>
