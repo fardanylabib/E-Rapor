@@ -16,6 +16,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 
+import Button from '@material-ui/core/Button';
 import firebase from '../../FirebaseConfig';
 
 const actionsStyles = theme => ({
@@ -98,9 +99,10 @@ const TablePaginationActionsWrapped = withStyles(actionsStyles, { withTheme: tru
 );
 
 let counter = 0;
-function createData(name, calories, fat) {
+
+function createData(nama, noHp, jumlahSiswa) {
   counter += 1;
-  return { id: counter, name, calories, fat };
+  return { id: counter, nama, noHp, jumlahSiswa };
 }
 
 const styles = theme => ({
@@ -128,29 +130,15 @@ const CustomTableCell = withStyles(theme => ({
   },
 }))(TableCell);
 
-const docRef = firebase.firestore().collection('guru').doc('69jjdknKJr5bJre4kAsG');
-
-
 class CustomPaginationActionsTable extends React.Component {
   state = {
-    rows: [
-      createData('Cupcake', 305, 3.7),
-      createData('Donut', 452, 25.0),
-      createData('Eclair', 262, 16.0),
-      createData('Frozen yoghurt', 159, 6.0),
-      createData('Gingerbread', 356, 16.0),
-      createData('Honeycomb', 408, 3.2),
-      createData('Ice cream sandwich', 237, 9.0),
-      createData('Jelly Bean', 375, 0.0),
-      createData('KitKat', 518, 26.0),
-      createData('Lollipop', 392, 0.2),
-      createData('Marshmallow', 318, 0),
-      createData('Nougat', 360, 19.0),
-      createData('Oreo', 437, 18.0),
-    ].sort((a, b) => (a.calories < b.calories ? -1 : 1)),
+    // rows: [],
+    rows: [],
     page: 0,
     rowsPerPage: 5,
+    hasQueried:false,
   };
+
 
   handleChangePage = (event, page) => {
     this.setState({ page });
@@ -160,34 +148,53 @@ class CustomPaginationActionsTable extends React.Component {
     this.setState({ page: 0, rowsPerPage: event.target.value });
   };
 
-  
+  query(){
+    const db = firebase.firestore();
+    db.collection('guru').get().then((querySnapshot) => {
+      querySnapshot.forEach(doc => {
+          const dataGuru = doc.data();
+          if(dataGuru){           
+            this.state.rows.push(createData(dataGuru.username, dataGuru.no_hp, 0));
+          }
+      });
+      this.setState({hasQueried:true});
+      this.state.rows.sort((a, b) => (a.nama < b.nama ? -1 : 1));
+    });
+    console.log("queried");
+  }
+
   render() {
     const { classes } = this.props;
-    const { rows, rowsPerPage, page } = this.state;
+    const { rows, rowsPerPage, page, hasQueried} = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
+    if(!hasQueried){
+      this.query();
+    }
     return (
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <CustomTableCell>Dessert (100g serving)</CustomTableCell>
-                <CustomTableCell align="right">Calories</CustomTableCell>
-                <CustomTableCell align="right">Fat (g)</CustomTableCell>
+                <CustomTableCell>Nama Guru</CustomTableCell>
+                <CustomTableCell align="right">No. Hp</CustomTableCell>
+                <CustomTableCell align="right">Jumlah Siswa</CustomTableCell>
              
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+              {
+                rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
                   <CustomTableCell component="th" scope="row">
-                    {row.name}
+                    {row.nama}
                   </CustomTableCell>
-                  <CustomTableCell align="right">{row.calories}</CustomTableCell>
-                  <CustomTableCell align="right">{row.fat}</CustomTableCell>
+                  <CustomTableCell align="right">{row.noHp}</CustomTableCell>
+                  <CustomTableCell align="right">{row.jumlahSiswa}</CustomTableCell>
                 </TableRow>
-              ))}
+                ))
+              }
               {emptyRows > 0 && (
                 <TableRow style={{ height: 48 * emptyRows }}>
                   <CustomTableCell colSpan={6} />
