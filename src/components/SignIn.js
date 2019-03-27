@@ -15,6 +15,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
+import firebase from '../FirebaseConfig';
+
 
 const styles = {
   appBar: {
@@ -41,6 +43,13 @@ function Transition(props) {
 class SignIn extends React.Component {
   state = {
     open: false,
+    mailVal:"",
+    passVal:"",
+    nameVal: "",
+    phoneVal: "",
+    addrVal: "",
+    instVal: "",
+    userStatus: null,
   };
 
   handleClickOpen = () => {
@@ -48,6 +57,42 @@ class SignIn extends React.Component {
   };
 
   handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  handleRegister = () => {
+    //query is user already registered
+    const db = firebase.firestore();
+     db.collection('guru').get().then((querySnapshot) => {
+      querySnapshot.forEach(doc => {
+          const dataGuru = doc.data();
+          if(dataGuru){           
+            if( this.state.phoneVal === dataGuru.no_hp){
+              this.setState({ userStatus: "NOK" });
+              return;
+            }else{
+              this.setState({ userStatus: "OK" });
+            }
+          }
+      });
+    });
+    if(this.state.userStatus){
+      if(this.state.userStatus === "OK"){
+        console.log("Pendaftaran berhasil");
+      }else{
+        console.log("Pengguna dengan username dan no.hp ini telah teraftar");
+      }
+    }else{
+      console.log("database query failed");
+    }
+    //create user from firebase   
+    firebase.auth().createUserWithEmailAndPassword(this.state.mailVal, this.state.passVal).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(errorCode + " | "+errorMessage);
+      // ...
+    });
     this.setState({ open: false });
   };
 
@@ -87,22 +132,21 @@ class SignIn extends React.Component {
               </div>
               
             </DialogContentText>
-              <TextField autoFocus margin="dense" id="name" label="Email Address" type="email" fullWidth
+              <TextField autoFocus margin="dense" id="name" label="Email Address" type="email" value={this.state.mailVal} onChange={e => this.setState({ mailVal: e.target.value })} fullWidth
                 required/>
-              <TextField margin="dense" id="pass" label="Password" type="password" fullWidth
+              <TextField margin="dense" id="pass" label="Password" type="password" value={this.state.passVal} onChange={e => this.setState({ passVal: e.target.value })} fullWidth
                 required/>
-              <TextField margin="dense" id="user" label="Username" type="text" fullWidth
-                required/>
-              <TextField margin="dense" id="phone" label="No.Hp/WA" type="tel" fullWidth />
-              <TextField margin="dense" id="address" label="Alamat" type="text" fullWidth />
-              <TextField margin="dense" id="institution" label="Institusi" type="text" fullWidth />
+              <TextField margin="dense" id="longName" label="Nama Lengkap" type="text" value={this.state.nameVal} onChange={e => this.setState({ nameVal: e.target.value })} fullWidth />                
+              <TextField margin="dense" id="phone" label="No.Hp/WA" type="tel" value={this.state.phoneVal} onChange={e => this.setState({ phoneVal: e.target.value })} fullWidth />
+              <TextField margin="dense" id="address" label="Alamat" type="text" value={this.state.addrVal} onChange={e => this.setState({ addrVal: e.target.value })} fullWidth />
+              <TextField margin="dense" id="institution" label="Institusi" type="text" value={this.state.instVal} onChange={e => this.setState({ instVal: e.target.value })} fullWidth/>
             </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} className={classes.cancelbutton} size="large" >
               Cancel
             </Button>
-            <Button onClick={this.handleClose} className={classes.okbutton} variant="contained" size="large">
-              Sign Up
+            <Button onClick={this.handleRegister} className={classes.okbutton} variant="contained" size="large">
+              Register
             </Button>
           </DialogActions>
         </Dialog>

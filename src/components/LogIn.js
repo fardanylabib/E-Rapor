@@ -6,10 +6,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import GoogleLogo from '../media/icons8-google.png';
-import PropTypes from 'prop-types';
-import withFirebaseAuth from 'react-auth-firebase';
-import FirebaseConfig from '../FirebaseConfig'
+// import GoogleLogo from '../media/icons8-google.png';
+// import PropTypes from 'prop-types';
+import firebase from '../FirebaseConfig';
 
 const style = {
     login:{
@@ -28,8 +27,13 @@ const style = {
 class LogIn extends React.Component {
   state = {
     open: false,
-    email: 'fardany@gmail.com',
-    password: 'password'
+    email: "",
+    password: "",
+    user: false,
+  };
+
+  handleSignOut = () => {
+    this.setState({ user: false });
   };
 
   handleClickOpen = () => {
@@ -40,131 +44,105 @@ class LogIn extends React.Component {
     this.setState({ open: false });
   };
 
+  handleLogin = () => {
+    firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+    .then(this.onLoginSuccess.bind(this))
+    .catch((error)=> {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(errorCode + " | "+errorMessage);
+      this.onLoginFailure.bind(this)(errorMessage);
+    });
+  }
+
+  onLoginSuccess = () =>{
+    this.setState({
+      open: false,
+      user: true,
+    });
+  }
+
+  onLoginFailure = (errorMessage) => {
+    console.log("errornya adalah "+errorMessage);
+    this.setState({
+      open: false,
+      user: false,
+    });
+  }
 
   render() {
-    const {
-      // classes,
-      signInWithEmail,
-      signUpWithEmail,
-      signInWithGoogle,
-      signInWithFacebook,
-      signInWithGithub,
-      signInWithTwitter,
-      googleAccessToken,
-      facebookAccessToken,
-      githubAccessToken,
-      twitterAccessToken,
-      twitterSecret,
-      user,
-      error,
-      signOut
-    } = this.props;
-
-    const { email, password } = this.state;
-
-    if(user){
+    const { user } = this.state;
+    if(!user){
+      console.log("user = "+ user);
       return (
         <div>
-          <Button color="inherit" onClick={signOut}>
+          <Button color="inherit" onClick={this.handleClickOpen}>
+            Masuk
+          </Button>
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+          >
+            <DialogTitle id="form-dialog-title">Masuk</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Sudah punya akun? Silahkan login
+              </DialogContentText>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                label="Email Address"
+                type="email"
+                fullWidth
+                value = {this.state.email}
+                onChange = {e => this.setState({ email: e.target.value })}
+              />
+              <TextField
+                margin="dense"
+                id="pass"
+                label="Password"
+                type="password"
+                fullWidth
+                value = {this.state.password}
+                onChange = {e => this.setState({ password: e.target.value })}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleClose} style={style.cancel}>
+                Cancel
+              </Button>
+              <Button onClick={this.handleLogin} style={style.login} variant="contained">
+                Log In
+              </Button>
+              {/* <Button onClick={signInWithGoogle} style={style.login} variant="contained">
+                Masuk Dengan &nbsp;&nbsp;
+                <img src={GoogleLogo} style={style.googleLogo} alt="HTML5 Icon"/>
+              </Button> */}
+            </DialogActions>
+            
+          </Dialog>
+        </div> 
+      );
+    }
+    else{
+      console.log("user = "+ user);
+      return (
+        <div>
+          <Button color="inherit" onClick={this.handleSignOut}>
             Keluar
           </Button>
         </div>
-        );
+      );
     }
-    return (
-      <div>
-        <Button color="inherit" onClick={this.handleClickOpen}>
-          Masuk
-        </Button>
-        <Dialog
-          open={this.state.open}
-          onClose={this.handleClose}
-          aria-labelledby="form-dialog-title"
-        >
-          <DialogTitle id="form-dialog-title">Masuk</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Sudah punya akun? Silahkan login
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Email Address"
-              type="email"
-              fullWidth
-              onChange = {e => this.setState({ email: e.target.value })}
-            />
-            <TextField
-              margin="dense"
-              id="pass"
-              label="Password"
-              type="password"
-              fullWidth
-              onChange = {e => this.setState({ password: e.target.value })}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleClose} style={style.cancel}>
-              Cancel
-            </Button>
-            <Button onClick={(email, password) => signInWithEmail(email, password)} style={style.login} variant="contained">
-              Log In
-            </Button>
-            <Button onClick={signInWithGoogle} style={style.login} variant="contained">
-              Masuk Dengan &nbsp;&nbsp;
-              <img src={GoogleLogo} style={style.googleLogo} alt="HTML5 Icon"/>
-            </Button>
-          </DialogActions>
-          
-        </Dialog>
-      </div> 
-    );
   }
 }
 
-
-const authConfig = {
-  email: {
-    verifyOnSignup: false,
-    saveUserInDatabase: true
-  },
-  google: {
-    // scopes: ["admin.datatransfer", "contacts.readonly"], // optional
-    // customParams: {
-    //   login_hint: "user@example.com"
-    // },
-    // redirect: true, // default is popup: true, redirect: true,
-    returnAccessToken: true,
-    // scopes: [], // array
-    saveUserInDatabase: true
-  },
-  facebook: {
-    // scopes: ["admin.datatransfer", "contacts.readonly"], // optional
-    // customParams: {
-    //   login_hint: "user@example.com"
-    // },
-    redirect: true, // default is popup: true, redirect: true,
-    returnAccessToken: true,
-    saveUserInDatabase: true
-  },
-  github: {
-    // redirect: true,
-    returnAccessToken: true,
-    saveUserInDatabase: true
-  },
-
-  twitter: {
-    // redirect: true,
-    returnAccessToken: true,
-    returnSecret: true,
-    saveUserInDatabase: true
-  }
-};
-
-LogIn.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+// LogIn.propTypes = {
+//   classes: PropTypes.object.isRequired,
+// };
 
 // export default App;
-export default withFirebaseAuth(LogIn, FirebaseConfig, authConfig);
+export default LogIn;
