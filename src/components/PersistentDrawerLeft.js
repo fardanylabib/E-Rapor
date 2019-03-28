@@ -1,41 +1,40 @@
-// '#81ecec' 
-//  '#2d3436'
+//functional
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { Route, Switch, Link } from 'react-router-dom';
+
+//material-ui components
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
-import { Route, Switch, Link } from 'react-router-dom';
-//import pages
+
+//pages & components
 import Dashboard from '../components/pages/Dashboard';
 import Kehadiran from '../components/pages/Kehadiran';
 import Perkembangan from '../components/pages/Perkembangan';
 import Pembayaran from '../components/pages/Pembayaran';
-
 import Login from '../components/LogIn';
-import SignIn from '../components/SignIn';
+import Register from '../components/Register';
 
+//images & icons
+import AlmasLogo from '../media/logo-almastutoring.png';
 import IconButton from '@material-ui/core/IconButton';
-
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-
 import HowToRegIcon from '@material-ui/icons/HowToReg';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import HomeIcon from '@material-ui/icons/Home';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
-
-import AlmasLogo from '../media/logo-almastutoring.png';
 
 const drawerWidth = 220;
 
@@ -113,9 +112,15 @@ function ListItemLink(props) {
 
 class PersistentDrawerLeft extends React.Component {
   
-  state = {
-    open: false,
-  };
+  constructor(){
+    super();
+    this.state = {
+      open: false,
+      user:false,
+    };
+    this.handleUserLogin = this.handleUserLogin.bind(this);
+  }
+  
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -125,13 +130,23 @@ class PersistentDrawerLeft extends React.Component {
     this.setState({ open: false });
   };
 
-  // handleClickList = () => {
-  //   this.props.sendFunction;
-  // };
+  handleUserLogin = (userLoginState) =>{
+    console.log(userLoginState);
+    this.setState({user:userLoginState});
+  }
 
   render() {
-    const { classes, theme } = this.props;
-    const { open } = this.state;
+    const { classes, theme} = this.props;
+    const { open,user} = this.state;
+
+    let registration;
+    if(!user){
+      console.log("belum masuk");
+      registration = <Register/>;
+    }else{
+      console.log("masuk");
+      registration = null;
+    }
 
     return (
       <div className={classes.root}>
@@ -154,9 +169,8 @@ class PersistentDrawerLeft extends React.Component {
             <Typography variant="h6" color="inherit" align="left" noWrap className={classes.grow}>
               E-Rapor
             </Typography>
-            {/* <div className={classes.grow}></div> */}
-            <Login />
-            <SignIn />
+            <Login triggerUserLogin={this.handleUserLogin}/>
+            {registration}
           </Toolbar>
         </AppBar>
         <Drawer

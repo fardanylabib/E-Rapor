@@ -6,8 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-// import GoogleLogo from '../media/icons8-google.png';
-// import PropTypes from 'prop-types';
+//firebase
 import firebase from '../FirebaseConfig';
 
 const style = {
@@ -21,20 +20,19 @@ const style = {
     googleLogo:{
       width:20
     }
-    
 };
 
 class LogIn extends React.Component {
-  state = {
-    open: false,
-    email: "",
-    password: "",
-    user: false,
-  };
-
-  handleSignOut = () => {
-    this.setState({ user: false });
-  };
+  
+  constructor(props){
+    super(props);
+    this.state = {
+      open: false,
+      email: "",
+      password: "",
+      user: false,
+    };
+  }
 
   handleClickOpen = () => {
     this.setState({ open: true });
@@ -44,7 +42,7 @@ class LogIn extends React.Component {
     this.setState({ open: false });
   };
 
-  handleLogin = () => {
+  handleSignIn = () => {
     firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
     .then(this.onLoginSuccess.bind(this))
     .catch((error)=> {
@@ -56,30 +54,41 @@ class LogIn extends React.Component {
     });
   }
 
+  handleSignOut = () => {
+    firebase.auth().signOut()
+    .then(this.onLoginFailure.bind(this))
+    .catch(function(error) {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(errorCode + " | "+errorMessage);
+    });
+  };
+
   onLoginSuccess = () =>{
     this.setState({
       open: false,
       user: true,
     });
+    this.props.triggerUserLogin(this.state.user);
   }
 
-  onLoginFailure = (errorMessage) => {
-    console.log("errornya adalah "+errorMessage);
+  onLoginFailure = (message) => {
     this.setState({
       open: false,
       user: false,
     });
+    this.props.triggerUserLogin(this.state.user);
   }
 
   render() {
     const { user } = this.state;
     if(!user){
-      console.log("user = "+ user);
       return (
         <div>
           <Button color="inherit" onClick={this.handleClickOpen}>
             Masuk
           </Button>
+          
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
@@ -114,7 +123,7 @@ class LogIn extends React.Component {
               <Button onClick={this.handleClose} style={style.cancel}>
                 Cancel
               </Button>
-              <Button onClick={this.handleLogin} style={style.login} variant="contained">
+              <Button onClick={this.handleSignIn} style={style.login} variant="contained">
                 Log In
               </Button>
               {/* <Button onClick={signInWithGoogle} style={style.login} variant="contained">
@@ -124,11 +133,11 @@ class LogIn extends React.Component {
             </DialogActions>
             
           </Dialog>
-        </div> 
+          
+        </div>
       );
     }
     else{
-      console.log("user = "+ user);
       return (
         <div>
           <Button color="inherit" onClick={this.handleSignOut}>
@@ -143,6 +152,4 @@ class LogIn extends React.Component {
 // LogIn.propTypes = {
 //   classes: PropTypes.object.isRequired,
 // };
-
-// export default App;
 export default LogIn;
