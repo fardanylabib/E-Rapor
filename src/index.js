@@ -6,8 +6,14 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import {Provider} from 'react-redux';
+import {createStore} from 'redux';
+import reducer from './store/Reducer';
+
+
+const theStore = createStore(reducer);
 ReactDOM.render(
-  <App/>,
+  <Provider store = {theStore}><App/></Provider>,
   document.getElementById('root')
 );
 

@@ -54,3 +54,5 @@
   height:650px;
   background-image:url('./media/ELearning2.jpg');
 }
+
+button:focus {outline:0;}

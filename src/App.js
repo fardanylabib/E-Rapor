@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import PersistentDrawerLeft from './components/PersistentDrawerLeft';
+import PersistentDL from './components/PersistentDL';
 import BrowserRouter from 'react-router-dom/BrowserRouter';
 
 
@@ -9,12 +9,9 @@ class App extends Component {
 
     return (
       <div className="App">
-      
-        
         <BrowserRouter>
-          <PersistentDrawerLeft/>
+          <PersistentDL/>
         </BrowserRouter>
-        
       </div>
     );
   }

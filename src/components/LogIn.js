@@ -6,8 +6,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-//firebase
-import firebase from '../FirebaseConfig';
+import { connect } from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as Actions from '../store/Actions';
 
 const style = {
     login:{
@@ -28,9 +29,8 @@ class LogIn extends React.Component {
     super(props);
     this.state = {
       open: false,
-      email: "",
-      password: "",
-      user: false,
+      tempEmail:"",
+      tempPass:""
     };
   }
 
@@ -42,47 +42,10 @@ class LogIn extends React.Component {
     this.setState({ open: false });
   };
 
-  handleSignIn = () => {
-    firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
-    .then(this.onLoginSuccess.bind(this))
-    .catch((error)=> {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(errorCode + " | "+errorMessage);
-      this.onLoginFailure.bind(this)(errorMessage);
-    });
-  }
-
-  handleSignOut = () => {
-    firebase.auth().signOut()
-    .then(this.onLoginFailure.bind(this))
-    .catch(function(error) {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(errorCode + " | "+errorMessage);
-    });
-  };
-
-  onLoginSuccess = () =>{
-    this.setState({
-      open: false,
-      user: true,
-    });
-    this.props.triggerUserLogin(this.state.user);
-  }
-
-  onLoginFailure = (message) => {
-    this.setState({
-      open: false,
-      user: false,
-    });
-    this.props.triggerUserLogin(this.state.user);
-  }
-
   render() {
-    const { user } = this.state;
-    if(!user){
+    const {tempEmail,tempPass,open} = this.state;
+    console.log(this.props);
+    if(!this.props.user){
       return (
         <div>
           <Button color="inherit" onClick={this.handleClickOpen}>
@@ -90,7 +53,7 @@ class LogIn extends React.Component {
           </Button>
           
           <Dialog
-            open={this.state.open}
+            open={open}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
           >
@@ -106,8 +69,8 @@ class LogIn extends React.Component {
                 label="Email Address"
                 type="email"
                 fullWidth
-                value = {this.state.email}
-                onChange = {e => this.setState({ email: e.target.value })}
+                value = {tempEmail}
+                onChange = {e => this.setState({ tempEmail: e.target.value })}
               />
               <TextField
                 margin="dense"
@@ -115,15 +78,15 @@ class LogIn extends React.Component {
                 label="Password"
                 type="password"
                 fullWidth
-                value = {this.state.password}
-                onChange = {e => this.setState({ password: e.target.value })}
+                value = {tempPass}
+                onChange = {e => this.setState({ tempPass: e.target.value })}
               />
             </DialogContent>
             <DialogActions>
               <Button onClick={this.handleClose} style={style.cancel}>
                 Cancel
               </Button>
-              <Button onClick={this.handleSignIn} style={style.login} variant="contained">
+              <Button onClick={() => this.props.handleSignIn(tempEmail,tempPass)} style={style.login} variant="contained">
                 Log In
               </Button>
               {/* <Button onClick={signInWithGoogle} style={style.login} variant="contained">
@@ -140,7 +103,7 @@ class LogIn extends React.Component {
     else{
       return (
         <div>
-          <Button color="inherit" onClick={this.handleSignOut}>
+          <Button color="inherit" onClick={this.props.handleSignOut}>
             Keluar
           </Button>
         </div>
@@ -149,7 +112,15 @@ class LogIn extends React.Component {
   }
 }
 
-// LogIn.propTypes = {
-//   classes: PropTypes.object.isRequired,
-// };
-export default LogIn;
+//redux
+const mapStateToProps = (state) => {
+  return {
+    user: state.isUser
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(Actions,dispatch);
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(LogIn);

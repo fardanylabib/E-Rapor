@@ -3,6 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { Route, Switch, Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 
 //material-ui components
 import { withStyles } from '@material-ui/core/styles';
@@ -17,12 +18,13 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 //pages & components
-import Dashboard from '../components/pages/Dashboard';
-import Kehadiran from '../components/pages/Kehadiran';
-import Perkembangan from '../components/pages/Perkembangan';
-import Pembayaran from '../components/pages/Pembayaran';
-import Login from '../components/LogIn';
-import Register from '../components/Register';
+import Dashboard from './pages/Dashboard';
+import Kehadiran from './pages/Kehadiran';
+import Perkembangan from './pages/Perkembangan';
+import Pembayaran from './pages/Pembayaran';
+import Login from './LogIn';
+import Register from './Register';
+import Messages from './Messages';
 
 //images & icons
 import AlmasLogo from '../media/logo-almastutoring.png';
@@ -36,8 +38,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 
+//========================================DRAWER=====================================================
 const drawerWidth = 220;
-
 const styles = theme => ({
   root: {
     display: 'flex',
@@ -65,9 +67,6 @@ const styles = theme => ({
     marginRight: 20,
   },
 
-  // loginButton: {
-  //   paddingRight: 20,
-  // },
   hide: {
     display: 'none',
   },
@@ -103,7 +102,6 @@ const styles = theme => ({
     }),
     marginLeft: 0,
   },
-
 });
 
 function ListItemLink(props) {
@@ -111,33 +109,26 @@ function ListItemLink(props) {
 }
 
 class PersistentDrawerLeft extends React.Component {
-  
   constructor(){
     super();
     this.state = {
       open: false,
-      user:false,
     };
-    this.handleUserLogin = this.handleUserLogin.bind(this);
   }
-  
 
   handleDrawerOpen = () => {
-    this.setState({ open: true });
+    if(this.props.user){
+      this.setState({ open: true });
+    }
   };
 
   handleDrawerClose = () => {
     this.setState({ open: false });
   };
 
-  handleUserLogin = (userLoginState) =>{
-    console.log(userLoginState);
-    this.setState({user:userLoginState});
-  }
-
   render() {
-    const { classes, theme} = this.props;
-    const { open,user} = this.state;
+    const { classes, theme,user} = this.props;
+    const { open} = this.state;
 
     let registration;
     if(!user){
@@ -169,10 +160,11 @@ class PersistentDrawerLeft extends React.Component {
             <Typography variant="h6" color="inherit" align="left" noWrap className={classes.grow}>
               E-Rapor
             </Typography>
-            <Login triggerUserLogin={this.handleUserLogin}/>
+            <Login />
             {registration}
           </Toolbar>
         </AppBar>
+        <Messages/>
         <Drawer
           className={classes.drawer}
           variant="persistent"
@@ -228,6 +220,7 @@ class PersistentDrawerLeft extends React.Component {
             <Route path ='/perkembangan' component={Perkembangan} />
             <Route path ='/pembayaran' component={Pembayaran} />
           </Switch>
+          
         </main>
       </div>
     );
@@ -239,4 +232,12 @@ PersistentDrawerLeft.propTypes = {
   theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(PersistentDrawerLeft);
+//redux
+const mapStateToProps = (state) => {
+  return {
+    user: state.isUser
+  }
+}
+
+const PersistentDL = withStyles(styles, { withTheme: true })(PersistentDrawerLeft);
+export default connect(mapStateToProps)(PersistentDL);

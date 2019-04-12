@@ -22,7 +22,7 @@ const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
     color: theme.palette.text.secondary,
-    marginLeft: theme.spacing.unit * 2.5,
+    // marginLeft: theme.spacing.unit * 2.5,
   },
 });
 
@@ -107,14 +107,14 @@ function createData(nama, noHp, jumlahSiswa) {
 const styles = theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing.unit,
   },
   table: {
     minWidth: 200,
   },
-  tableWrapper: {
-    overflowX: 'auto',
-  },
+  // tableWrapper: {
+  //   overflowX: 'auto',
+  // },
 });
 
 const CustomTableCell = withStyles(theme => ({
@@ -122,10 +122,10 @@ const CustomTableCell = withStyles(theme => ({
   head: {
     backgroundColor: '#F9BE02',
     color: theme.palette.common.white,
-    fontSize: 15,
+    fontSize: 14,
   },
   body: {
-    fontSize: 15,
+    fontSize: 12,
   },
 }))(TableCell);
 
