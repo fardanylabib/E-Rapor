@@ -20,7 +20,9 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.5",
     "react-with-firebase-auth": "^1.0.2",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "redux-logger": "^3.0.6",
+    "redux-saga": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",

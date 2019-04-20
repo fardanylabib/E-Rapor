@@ -1,6 +1,7 @@
 export function handleSignIn(email,passw) {
+    console.log('SIGN IN WITH '+email+' '+passw);
     return{
-        type: 'SIGNIN',
+        type: 'SIGN_IN',
         email,
         passw
     }
@@ -8,7 +9,7 @@ export function handleSignIn(email,passw) {
 
 export function handleSignOut() {
     return{
-        type: 'SIGNOUT'
+        type: 'SIGN_OUT'
     }
 }
 

@@ -117,7 +117,7 @@ class PersistentDrawerLeft extends React.Component {
   }
 
   handleDrawerOpen = () => {
-    if(this.props.user){
+    if(this.props.isUser){
       this.setState({ open: true });
     }
   };
@@ -127,11 +127,11 @@ class PersistentDrawerLeft extends React.Component {
   };
 
   render() {
-    const { classes, theme,user} = this.props;
+    const { classes, theme,isUser} = this.props;
     const { open} = this.state;
 
     let registration;
-    if(!user){
+    if(!isUser){
       console.log("belum masuk");
       registration = <Register/>;
     }else{
@@ -235,7 +235,7 @@ PersistentDrawerLeft.propTypes = {
 //redux
 const mapStateToProps = (state) => {
   return {
-    user: state.isUser
+    isUser: state.isUser
   }
 }
 

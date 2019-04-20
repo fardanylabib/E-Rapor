@@ -44,8 +44,7 @@ class LogIn extends React.Component {
 
   render() {
     const {tempEmail,tempPass,open} = this.state;
-    console.log(this.props);
-    if(!this.props.user){
+    if(!this.props.isUser){
       return (
         <div>
           <Button color="inherit" onClick={this.handleClickOpen}>
@@ -115,7 +114,7 @@ class LogIn extends React.Component {
 //redux
 const mapStateToProps = (state) => {
   return {
-    user: state.isUser
+    isUser: state.isUser
   }
 }
 
