@@ -16,6 +16,9 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import firebase from '../FirebaseConfig';
+import { connect } from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as Actions from '../store/Actions';
 
 const styles = {
   appBar: {
@@ -36,7 +39,7 @@ const styles = {
 };
 
 function Transition(props) {
-  return <Slide direction="up" {...props} />;
+  return <Slide direction='up' {...props} />;
 }
 
 class Register extends React.Component {
@@ -45,13 +48,12 @@ class Register extends React.Component {
     super(props);
     this.state = {
       open: false,
-      mailVal:"",
-      passVal:"",
-      nameVal: "",
-      phoneVal: "",
-      addrVal: "",
-      instVal: "",
-      userStatus: null,
+      mailVal:'',
+      passVal:'',
+      nameVal: '',
+      phoneVal: '',
+      addrVal: '',
+      instVal: '',
       notRegistering:true,
     };
   }
@@ -67,56 +69,63 @@ class Register extends React.Component {
   handleRegister = () => {
     //query is user already registered
     const db = firebase.firestore();
-     db.collection('guru').get().then((querySnapshot) => {
+    db.collection('guru').get().then((querySnapshot) => {
       querySnapshot.forEach(doc => {
           const dataGuru = doc.data();
           if(dataGuru){           
             if( this.state.phoneVal === dataGuru.no_hp){
-              this.setState({ userStatus: "NOK" });
+              this.props.openMessage('error','Pengguna dengan username dan no.hp ini telah teraftar');
               return;
-            }else{
-              this.setState({ userStatus: "OK" });
             }
+          }else{
+            console.log('database query failed');
           }
       });
-    });
-    if(this.state.userStatus){
-      if(this.state.userStatus === "OK"){
-        console.log("Pendaftaran berhasil");
-      }else{
-        console.log("Pengguna dengan username dan no.hp ini telah teraftar");
-      }
-    }else{
-      console.log("database query failed");
-    }
-    //create user from firebase   
-    firebase.auth().createUserWithEmailAndPassword(this.state.mailVal, this.state.passVal)
-    .then((verify)=>{
-      firebase.auth().currentUser.sendEmailVerification()
-      .then(this.processEmailVerification.bind(this)(verify))
+
+      //create user from firebase   
+      firebase.auth().createUserWithEmailAndPassword(this.state.mailVal, this.state.passVal)
+      .then((verify)=>{
+        firebase.auth().currentUser.sendEmailVerification()
+        .then(this.processUserInfo.bind(this)(verify))
         .catch(function(error) {
-          console.log("Email varifikasi gagal. Mohon ganti email yang valid");
+          this.props.openMessage('error','Email varifikasi gagal. Mohon ganti email yang valid');
         });
-    })
-    .catch(function(error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(errorCode + " | "+errorMessage);
-      // ...
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        this.props.openMessage('error',errorCode + ' | '+errorMessage);
+        // ...
+      });
+
+      this.props.openMessage('success','Pendaftaran Berhasil');
     });
   };
 
-  processEmailVerification = () => {
-    console.log("email terkirim, silahkan buka link aktivasi");
-    this.setState({notRegistering:false});
+  processUserInfo = () => {
+    const db = firebase.firestore();
+    db.collection('guru').doc(this.state.mailVal).set({
+        nama: this.state.nameVal,
+        no_hp: this.state.phoneVal,
+        alamat: this.state.addrVal,
+        institusi: this.state.addrVal
+    })
+    .then(function() {
+      //email verification
+      this.props.openMessage('success','User telah berhasil dibuat, silahkan buka email aktivasi untuk mengaktifkan. Setelah itu, klik tombol "Konfirmasi Verifikasi".');
+      this.setState({notRegistering:false});
+    })
+    .catch(function(error) {
+      this.props.openMessage('error','User writing error');
+    });
   }
 
   render() {
     const { classes} = this.props;
     return (
       <div>
-        <Button color="inherit" onClick={this.handleClickOpen}>
+        <Button color='inherit' onClick={this.handleClickOpen}>
           Daftar
         </Button>
         <Dialog
@@ -127,10 +136,10 @@ class Register extends React.Component {
         >
           <AppBar className={classes.appBar}>
             <Toolbar>
-              <Typography variant="h6" color="inherit" className={classes.flex}>
+              <Typography variant='h6' color='inherit' className={classes.flex}>
                 Daftarkan Akun
               </Typography>
-              <IconButton color="inherit" onClick={this.handleClose} aria-label="Close">
+              <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
                 <CloseIcon />
               </IconButton>
             </Toolbar>
@@ -138,38 +147,35 @@ class Register extends React.Component {
 
           <DialogContent>
             <DialogContentText>
-              <div>
                 <br/>
                 <br/>
                 Mari menjadi mitra Almas Tutoring, bersama mencerdaskan anak bangsa!
                 <br/>
-                <br/>
-              </div>
-              
+                <br/>              
             </DialogContentText>
-            <TextField autoFocus margin="dense" id="name" label="Email Address" type="email" value={this.state.mailVal} onChange={e => this.setState({ mailVal: e.target.value })} fullWidth
+            <TextField autoFocus margin='dense' id='name' label='Email Address' type='email' value={this.state.mailVal} onChange={e => this.setState({ mailVal: e.target.value })} fullWidth
               required/>
-            <TextField margin="dense" id="pass" label="Password" type="password" value={this.state.passVal} onChange={e => this.setState({ passVal: e.target.value })} fullWidth
+            <TextField margin='dense' id='pass' label='Password' type='password' value={this.state.passVal} onChange={e => this.setState({ passVal: e.target.value })} fullWidth
               required/>
-            <TextField margin="dense" id="longName" label="Nama Lengkap" type="text" value={this.state.nameVal} onChange={e => this.setState({ nameVal: e.target.value })} fullWidth />                
-            <TextField margin="dense" id="phone" label="No.Hp/WA" type="tel" value={this.state.phoneVal} onChange={e => this.setState({ phoneVal: e.target.value })} fullWidth />
-            <TextField margin="dense" id="address" label="Alamat" type="text" value={this.state.addrVal} onChange={e => this.setState({ addrVal: e.target.value })} fullWidth />
-            <TextField margin="dense" id="institution" label="Institusi" type="text" value={this.state.instVal} onChange={e => this.setState({ instVal: e.target.value })} fullWidth/>
+            <TextField margin='dense' id='longName' label='Nama Lengkap' type='text' value={this.state.nameVal} onChange={e => this.setState({ nameVal: e.target.value })} fullWidth />                
+            <TextField margin='dense' id='phone' label='No.Hp/WA' type='tel' value={this.state.phoneVal} onChange={e => this.setState({ phoneVal: e.target.value })} fullWidth />
+            <TextField margin='dense' id='address' label='Alamat' type='text' value={this.state.addrVal} onChange={e => this.setState({ addrVal: e.target.value })} fullWidth />
+            <TextField margin='dense' id='institution' label='Institusi' type='text' value={this.state.instVal} onChange={e => this.setState({ instVal: e.target.value })} fullWidth/>
           </DialogContent>
           {
             this.state.notRegistering ?
             <DialogActions>
-              <Button onClick={this.handleClose} className={classes.cancelbutton} size="large" >
+              <Button onClick={this.handleClose} className={classes.cancelbutton} size='large' >
                 Cancel
               </Button>
-              <Button onClick={this.handleRegister} className={classes.okbutton} variant="contained" size="large">
+              <Button onClick={this.handleRegister} className={classes.okbutton} variant='contained' size='large'>
                 Register
               </Button>
             </DialogActions>
             :
             <DialogActions>
-              <Button href= "/" className={classes.okbutton} variant="contained" size="large">
-                Verifikasi Email
+              <Button href= '/' className={classes.okbutton} variant='contained' size='large'>
+                Konfirmasi Verifikasi
               </Button>
             </DialogActions>
           }
@@ -183,4 +189,19 @@ Register.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Register);
+//redux
+// const mapStateToProps = (state) => {
+//   return {
+//     isUser: state.isUser
+//   }
+// }
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(Actions,dispatch);
+}
+
+const Registration = withStyles(styles)(Register);
+
+export default connect(null,mapDispatchToProps)(Registration);
+
+

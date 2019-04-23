@@ -13,7 +13,7 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
 import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
-import {closeMessage} from '../store/Actions';
+import * as Actions from '../store/Actions';
 import {bindActionCreators} from 'redux';
 
 const variantIcon = {
@@ -132,7 +132,7 @@ const mapStateToProps = (state) => {
   }
 }
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators(closeMessage,dispatch);
+  return bindActionCreators(Actions,dispatch);
 }
 
 const Messages =  withStyles(styles2)(CustomizedSnackbars);

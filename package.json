@@ -8,6 +8,7 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
+    "circular-json": "^0.5.9",
     "firebase": "^5.9.0",
     "firestore-parser": "^0.8.6",
     "node-sass": "^4.11.0",

@@ -164,7 +164,7 @@ class PersistentDrawerLeft extends React.Component {
             {registration}
           </Toolbar>
         </AppBar>
-        <Messages/>
+        <Messages />
         <Drawer
           className={classes.drawer}
           variant="persistent"

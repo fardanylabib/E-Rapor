@@ -1,14 +1,15 @@
 const initialState = {
     //user auth state
     isUser:false,
-    
+    isAdmin:false,
     //messages
     messageOpen: false,
     messageVariation:"success",
-    messageContent:""
+    messageContent:"",
+    queried:false,
 }
 
-async function reducer(state = initialState, action){
+function reducer(state = initialState, action){
     switch (action.type){
         case 'SIGN_IN':
         case 'SIGN_OUT':
@@ -20,7 +21,8 @@ async function reducer(state = initialState, action){
             if(action.login){
                 return {
                     ...state,
-                    isUser: true
+                    isUser: true,
+                    isAdmin:action.isAdmin
                 }
             }
             return {
@@ -28,10 +30,18 @@ async function reducer(state = initialState, action){
               isUser: false
             }
         case 'MESSAGE':
-            // newState.messageOpen = true;
-            // newState.messageVariation = action.value1;
-            // newState.messageContent = action.value2;
-            break; 
+            return {
+                ...state,
+                messageOpen: true,
+                messageVariation : action.variation,
+                messageContent : action.content
+            }
+        case 'CLOSE_MSG':
+            console.log('close message');
+            return{
+                ...state,
+                messageOpen: false,
+            }     
         default:
           return state;
     }

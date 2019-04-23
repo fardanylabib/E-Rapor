@@ -15,9 +15,12 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import { connect } from 'react-redux';
+// import {bindActionCreators} from 'redux';
+import * as Actions from '../../store/Actions';
 
 import firebase from '../../FirebaseConfig';
-
+const JSON = require('circular-json');
 const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
@@ -99,9 +102,9 @@ const TablePaginationActionsWrapped = withStyles(actionsStyles, { withTheme: tru
 
 let counter = 0;
 
-function createData(nama, noHp, jumlahSiswa) {
+function createData(sesi, guru, kelas, mapel, murid) {
   counter += 1;
-  return { id: counter, nama, noHp, jumlahSiswa };
+  return { id: counter, sesi, guru, kelas, mapel, murid};
 }
 
 const styles = theme => ({
@@ -131,13 +134,11 @@ const CustomTableCell = withStyles(theme => ({
 
 class CustomPaginationActionsTable extends React.Component {
   state = {
-    // rows: [],
     rows: [],
     page: 0,
     rowsPerPage: 5,
-    hasQueried:false,
+    hasQueried:false
   };
-
 
   handleChangePage = (event, page) => {
     this.setState({ page });
@@ -147,50 +148,72 @@ class CustomPaginationActionsTable extends React.Component {
     this.setState({ page: 0, rowsPerPage: event.target.value });
   };
 
-  query(){
+  queryDashboard(){
     const db = firebase.firestore();
-    db.collection('guru').get().then((querySnapshot) => {
-      querySnapshot.forEach(doc => {
-          const dataGuru = doc.data();
-          if(dataGuru){           
-            this.state.rows.push(createData(dataGuru.username, dataGuru.no_hp, 0));
+    if(this.props.isAdmin){
+      let tempRows = [];
+      db.collection('sesi').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const dataSesi = doc.data();
+          if(dataSesi){
+            const dataGuru = dataSesi.guru;
+            var namaGuru = '';
+            if(dataGuru){
+              dataGuru.get().then((result)=>{
+                namaGuru = result.data().username;
+                tempRows.push(createData(dataSesi.nama_sesi, namaGuru, dataSesi.kelas, dataSesi.mapel[0], 'saimin'));
+                
+              });
+            }else{
+              tempRows.push(createData(dataSesi.nama_sesi, 'tidak ada', dataSesi.kelas, dataSesi.mapel[0], 'saimin'));
+            }
+            //push setiap sesi disini
+            // console.log(dataSesi.nama_sesi +" "+ namaGuru +" "+ dataSesi.kelas +" "+ dataSesi.mapel[0] +" "+ "saimin") ;         
           }
+        });
+      }).then(()=>{
+        tempRows.sort((a, b) => (a.sesi < b.sesi ? -1 : 1));
+        this.setState({ rows : tempRows,  hasQueried : true});
       });
-      this.setState({hasQueried:true});
-      this.state.rows.sort((a, b) => (a.nama < b.nama ? -1 : 1));
-    });
-    console.log("queried");
+    }
   }
 
   render() {
     const { classes } = this.props;
-    const { rows, rowsPerPage, page, hasQueried} = this.state;
+    const { rows, rowsPerPage, page,hasQueried} = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-    if(!hasQueried){
-      this.query();
+    if(this.props.isUser && !hasQueried){
+      console.log("sudah user query");
+      this.queryDashboard(); 
+    }else{
+      console.log("belum user query");
     }
+    // console.log(rows) ;
+    //labibfardany
     return (
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <CustomTableCell>Nama Guru</CustomTableCell>
-                <CustomTableCell align="right">No. Hp</CustomTableCell>
-                <CustomTableCell align="right">Jumlah Siswa</CustomTableCell>
-             
+                <CustomTableCell>Course</CustomTableCell>
+                <CustomTableCell align="center">Guru</CustomTableCell>
+                <CustomTableCell align="center">Kelas</CustomTableCell>
+                <CustomTableCell align="center">Mata Pelajaran</CustomTableCell>
+                <CustomTableCell align="center">Siswa</CustomTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {
+                //sesi, guru, kelas, mapel, murid}
                 rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
-                  <CustomTableCell component="th" scope="row">
-                    {row.nama}
-                  </CustomTableCell>
-                  <CustomTableCell align="right">{row.noHp}</CustomTableCell>
-                  <CustomTableCell align="right">{row.jumlahSiswa}</CustomTableCell>
+                  <CustomTableCell component="th" scope="row">{row.sesi}</CustomTableCell>
+                  <CustomTableCell align="center">{row.guru}</CustomTableCell>
+                  <CustomTableCell align="center">{row.kelas}</CustomTableCell>
+                  <CustomTableCell align="center">{row.mapel}</CustomTableCell>
+                  <CustomTableCell align="center">{row.murid}</CustomTableCell>
                 </TableRow>
                 ))
               }
@@ -228,4 +251,20 @@ CustomPaginationActionsTable.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(CustomPaginationActionsTable);
+//redux
+const mapStateToProps = (state) => {
+  return {
+    isAdmin: state.isAdmin,
+    isUser: state.isUser
+  }
+}
+
+// const mapDispatchToProps = (dispatch) => {
+//   return bindActionCreators(Actions,dispatch);
+// }
+
+const MyDashboard = withStyles(styles)(CustomPaginationActionsTable);
+
+export default connect(mapStateToProps,null)(MyDashboard);
+
+

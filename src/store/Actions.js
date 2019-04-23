@@ -13,6 +13,14 @@ export function handleSignOut() {
     }
 }
 
+export function openMessage(variation,content){
+    return{
+        type: 'MESSAGE',
+        variation,
+        content
+    }
+}
+
 export function closeMessage() {
     return{
         type: 'CLOSE_MSG'
