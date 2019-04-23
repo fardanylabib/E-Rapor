@@ -189,7 +189,7 @@ class CustomPaginationActionsTable extends React.Component {
     }else{
       console.log("belum user query");
     }
-    // console.log(rows) ;
+    console.log(rows) ;
     //labibfardany
     return (
       <Paper className={classes.root}>
