@@ -2,7 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Route, Switch, Link } from 'react-router-dom';
+import { withRouter, Route, Switch, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 //material-ui components
@@ -19,7 +19,7 @@ import Typography from '@material-ui/core/Typography';
 
 //pages & components
 import Dashboard from './pages/Dashboard';
-import Kehadiran from './pages/Kehadiran';
+import Profil from './pages/Profil';
 import Perkembangan from './pages/Perkembangan';
 import Pembayaran from './pages/Pembayaran';
 import Login from './LogIn';
@@ -127,16 +127,21 @@ class PersistentDrawerLeft extends React.Component {
   };
 
   render() {
-    const { classes, theme,isUser} = this.props;
-    const { open} = this.state;
-
+    const { classes, theme,isUser,email} = this.props;
+    let open;
     let registration;
+    let AppbarTitle;
     if(!isUser){
       console.log("belum masuk");
       registration = <Register/>;
+      open = false;
+      AppbarTitle = 'Almas Tutoring';
     }else{
       console.log("masuk");
       registration = null;
+      open = this.state.open;
+      const name = email.split('@')[0];
+      AppbarTitle = 'Hi, '+ name.substring(0,1).toUpperCase()+name.substring(1).toLowerCase()+ '!';
     }
 
     return (
@@ -158,7 +163,7 @@ class PersistentDrawerLeft extends React.Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" color="inherit" align="left" noWrap className={classes.grow}>
-              E-Rapor
+              {AppbarTitle}
             </Typography>
             <Login />
             {registration}
@@ -184,22 +189,22 @@ class PersistentDrawerLeft extends React.Component {
             <List>
               <ListItemLink to='/'>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
-                <ListItemText primary="Home" />
+                <ListItemText primary="Profil Saya" />
               </ListItemLink>
             
-              <ListItemLink to='/kehadiran'>
+              <ListItemLink to='/dashboard'>
                 <ListItemIcon><HowToRegIcon /></ListItemIcon>
-                <ListItemText primary="Kehadiran" />
+                <ListItemText primary="Daftar Kelas" />
               </ListItemLink>
             
               <ListItemLink to='/perkembangan' >
                 <ListItemIcon><TrendingUpIcon /></ListItemIcon>
-                <ListItemText primary="Perkembangan" />
+                <ListItemText primary="Perkembangan Siswa" />
               </ListItemLink>
   
               <ListItemLink to='/pembayaran'>
                 <ListItemIcon><MoneyIcon /></ListItemIcon>
-                <ListItemText primary="Pembayaran" />
+                <ListItemText primary="Pembayaran Siswa" />
               </ListItemLink>
               <ListItem button>
                 <ListItemIcon><DownloadIcon /></ListItemIcon>
@@ -215,8 +220,8 @@ class PersistentDrawerLeft extends React.Component {
         >
           <div className={classes.drawerHeader} />
           <Switch>
-            <Route exact path='/' component={Dashboard} />
-            <Route path ='/kehadiran' component={Kehadiran} />
+            <Route exact path='/' component={Profil} />
+            <Route path ='/dashboard' component={Dashboard} />
             <Route path ='/perkembangan' component={Perkembangan} />
             <Route path ='/pembayaran' component={Pembayaran} />
           </Switch>
@@ -235,9 +240,10 @@ PersistentDrawerLeft.propTypes = {
 //redux
 const mapStateToProps = (state) => {
   return {
-    isUser: state.isUser
+    isUser: state.isUser,
+    email: state.email
   }
 }
 
 const PersistentDL = withStyles(styles, { withTheme: true })(PersistentDrawerLeft);
-export default connect(mapStateToProps)(PersistentDL);
+export default withRouter(connect(mapStateToProps)(PersistentDL));

@@ -9,7 +9,8 @@ import * as serviceWorker from './serviceWorker';
 import {Provider} from 'react-redux';
 import {createStore,applyMiddleware} from 'redux';
 import createSagaMiddleware from 'redux-saga';
-//import { logger } from 'redux-logger';
+
+import BrowserRouter from 'react-router-dom/BrowserRouter';
 import reducer from './store/Reducer';
 import rootSaga from './store/Sagas';
 
@@ -18,7 +19,11 @@ const theStore = createStore(reducer,applyMiddleware(sagaMiddleware));
 sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
-  <Provider store = {theStore}><App/></Provider>,
+  <Provider store = {theStore}>
+    <BrowserRouter>
+      <App/>
+    </BrowserRouter>
+  </Provider>,
   document.getElementById('root')
 );
 

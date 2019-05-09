@@ -15,12 +15,14 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import { connect } from 'react-redux';
-// import {bindActionCreators} from 'redux';
-import * as Actions from '../../store/Actions';
 
-import firebase from '../../FirebaseConfig';
-const JSON = require('circular-json');
+import Button from '@material-ui/core/Button';
+import {handlePopup} from '../../store/Actions';
+import { connect } from 'react-redux';
+import {bindActionCreators} from 'redux';
+import PopupDashboard from './PopupDashboard';
+
+
 const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
@@ -100,13 +102,6 @@ const TablePaginationActionsWrapped = withStyles(actionsStyles, { withTheme: tru
   TablePaginationActions,
 );
 
-let counter = 0;
-
-function createData(sesi, guru, kelas, mapel, murid) {
-  counter += 1;
-  return { id: counter, sesi, guru, kelas, mapel, murid};
-}
-
 const styles = theme => ({
   root: {
     width: '100%',
@@ -126,18 +121,19 @@ const CustomTableCell = withStyles(theme => ({
     backgroundColor: '#F9BE02',
     color: theme.palette.common.white,
     fontSize: 14,
+    align:'center',
   },
   body: {
     fontSize: 12,
+    align:'center',
   },
 }))(TableCell);
 
 class CustomPaginationActionsTable extends React.Component {
   state = {
-    rows: [],
     page: 0,
     rowsPerPage: 5,
-    hasQueried:false
+    popup: false,
   };
 
   handleChangePage = (event, page) => {
@@ -147,73 +143,47 @@ class CustomPaginationActionsTable extends React.Component {
   handleChangeRowsPerPage = event => {
     this.setState({ page: 0, rowsPerPage: event.target.value });
   };
-
-  queryDashboard(){
-    const db = firebase.firestore();
-    if(this.props.isAdmin){
-      let tempRows = [];
-      db.collection('sesi').get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const dataSesi = doc.data();
-          if(dataSesi){
-            const dataGuru = dataSesi.guru;
-            var namaGuru = '';
-            if(dataGuru){
-              dataGuru.get().then((result)=>{
-                namaGuru = result.data().username;
-                tempRows.push(createData(dataSesi.nama_sesi, namaGuru, dataSesi.kelas, dataSesi.mapel[0], 'saimin'));
-                
-              });
-            }else{
-              tempRows.push(createData(dataSesi.nama_sesi, 'tidak ada', dataSesi.kelas, dataSesi.mapel[0], 'saimin'));
-            }
-            //push setiap sesi disini
-            // console.log(dataSesi.nama_sesi +" "+ namaGuru +" "+ dataSesi.kelas +" "+ dataSesi.mapel[0] +" "+ "saimin") ;         
-          }
-        });
-      }).then(()=>{
-        tempRows.sort((a, b) => (a.sesi < b.sesi ? -1 : 1));
-        this.setState({ rows : tempRows,  hasQueried : true});
-      });
-    }
+  
+  handlePopupClose = () =>{
+    this.setState({popup:true});
   }
 
   render() {
     const { classes } = this.props;
-    const { rows, rowsPerPage, page,hasQueried} = this.state;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
-    if(this.props.isUser && !hasQueried){
-      console.log("sudah user query");
-      this.queryDashboard(); 
-    }else{
-      console.log("belum user query");
-    }
-    console.log(rows) ;
+    const { rowsPerPage, page} = this.state;
+    const tableRows = this.props.rows;
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tableRows.length - page * rowsPerPage);
+    
     //labibfardany
     return (
+      !this.props.isUser?
+      null:
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <CustomTableCell>Course</CustomTableCell>
-                <CustomTableCell align="center">Guru</CustomTableCell>
-                <CustomTableCell align="center">Kelas</CustomTableCell>
-                <CustomTableCell align="center">Mata Pelajaran</CustomTableCell>
-                <CustomTableCell align="center">Siswa</CustomTableCell>
+                <CustomTableCell >Course</CustomTableCell>
+                <CustomTableCell >Guru</CustomTableCell>
+                <CustomTableCell >Kelas</CustomTableCell>
+                <CustomTableCell >Mata Pelajaran</CustomTableCell>
+                <CustomTableCell >Siswa</CustomTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {
                 //sesi, guru, kelas, mapel, murid}
-                rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                tableRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
-                  <CustomTableCell component="th" scope="row">{row.sesi}</CustomTableCell>
-                  <CustomTableCell align="center">{row.guru}</CustomTableCell>
-                  <CustomTableCell align="center">{row.kelas}</CustomTableCell>
-                  <CustomTableCell align="center">{row.mapel}</CustomTableCell>
-                  <CustomTableCell align="center">{row.murid}</CustomTableCell>
+                  <CustomTableCell component="th" scope="row" >
+                    <Button fullWidth onClick={() => this.props.handlePopup(true)}>
+                      {row.sesi}
+                    </Button>
+                  </CustomTableCell>
+                  <CustomTableCell >{row.guru}</CustomTableCell>
+                  <CustomTableCell >{row.kelas}</CustomTableCell>
+                  <CustomTableCell >{row.mapel}</CustomTableCell>
+                  <CustomTableCell >{row.murid}</CustomTableCell>
                 </TableRow>
                 ))
               }
@@ -228,7 +198,7 @@ class CustomPaginationActionsTable extends React.Component {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25]}
                   colSpan={3}
-                  count={rows.length}
+                  count={tableRows.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   SelectProps={{
@@ -242,6 +212,7 @@ class CustomPaginationActionsTable extends React.Component {
             </TableFooter>
           </Table>
         </div>
+      <PopupDashboard/>
       </Paper>
     );
   }
@@ -250,21 +221,20 @@ class CustomPaginationActionsTable extends React.Component {
 CustomPaginationActionsTable.propTypes = {
   classes: PropTypes.object.isRequired,
 };
+const MyDashboard = withStyles(styles)(CustomPaginationActionsTable);
 
-//redux
+//==========================================redux==========================================
 const mapStateToProps = (state) => {
   return {
-    isAdmin: state.isAdmin,
-    isUser: state.isUser
+    isUser: state.isUser,
+    rows: state.rows
   }
 }
 
-// const mapDispatchToProps = (dispatch) => {
-//   return bindActionCreators(Actions,dispatch);
-// }
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({handlePopup},dispatch);
+}
 
-const MyDashboard = withStyles(styles)(CustomPaginationActionsTable);
-
-export default connect(mapStateToProps,null)(MyDashboard);
+export default connect(mapStateToProps,mapDispatchToProps)(MyDashboard);
 
 

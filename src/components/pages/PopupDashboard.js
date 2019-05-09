@@ -8,10 +8,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {handleSignIn,handleSignOut} from '../store/Actions';
+import {handlePopup} from '../../store/Actions';
 
 const style = {
-    login:{
+    PopupDashboard:{
       background: '#02C8A7',
       color: 'white',
     },
@@ -23,7 +23,7 @@ const style = {
     }
 };
 
-class LogIn extends React.Component {
+class PopupDashboard extends React.Component {
   
   constructor(props){
     super(props);
@@ -34,32 +34,27 @@ class LogIn extends React.Component {
     };
   }
 
-  handleClickOpen = () => {
-    this.setState({ open: true });
-  };
-
   handleClose = () => {
     this.setState({ open: false });
   };
 
   render() {
     const {tempEmail,tempPass,open} = this.state;
-    if(!this.props.isUser){
+    if(!this.props.popupOpen){
+        return null; 
+    }
+    else{
       return (
-        <div>
-          <Button color="inherit" onClick={this.handleClickOpen}>
-            Masuk
-          </Button>
-          
+        <div>        
           <Dialog
-            open={open}
-            onClose={this.handleClose}
+            open={true}
+            onClose={() => this.props.handlePopup(false)}
             aria-labelledby="form-dialog-title"
           >
             <DialogTitle id="form-dialog-title">Masuk</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Sudah punya akun? Silahkan login
+                Sudah punya akun? Silahkan PopupDashboard
               </DialogContentText>
               <TextField
                 autoFocus
@@ -82,13 +77,13 @@ class LogIn extends React.Component {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.handleClose} style={style.cancel}>
+              <Button onClick={() => this.props.handlePopup(false)} style={style.cancel}>
                 Cancel
               </Button>
-              <Button onClick={() => this.props.handleSignIn(tempEmail,tempPass)} style={style.login} variant="contained">
+              <Button variant="contained">
                 Log In
               </Button>
-              {/* <Button onClick={signInWithGoogle} style={style.login} variant="contained">
+              {/* <Button onClick={signInWithGoogle} style={style.PopupDashboard} variant="contained">
                 Masuk Dengan &nbsp;&nbsp;
                 <img src={GoogleLogo} style={style.googleLogo} alt="HTML5 Icon"/>
               </Button> */}
@@ -99,27 +94,18 @@ class LogIn extends React.Component {
         </div>
       );
     }
-    else{
-      return (
-        <div>
-          <Button color="inherit" onClick={this.props.handleSignOut}>
-            Keluar
-          </Button>
-        </div>
-      );
-    }
   }
 }
 
 //redux
 const mapStateToProps = (state) => {
   return {
-    isUser: state.isUser
+    popupOpen: state.popupOpen
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({handleSignIn,handleSignOut},dispatch);
+    return bindActionCreators({handlePopup},dispatch);
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(LogIn);
+export default connect(mapStateToProps,mapDispatchToProps)(PopupDashboard);
