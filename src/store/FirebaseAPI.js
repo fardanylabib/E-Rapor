@@ -53,31 +53,22 @@ export async function firebaseQueryDashboard(isAdmin,emailSearch){
         const dataSesi = session.data();
         if(dataSesi){
           let mataPelajaran = '-';
-          let namaGuru = '-';
-          let namaMurid = '-';
+          let dataGuru = null;
+          let dataMurid = [];
   
           if(dataSesi.guru){
-            let dataGuru = await getDataFromReference(dataSesi.guru);
-            namaGuru = dataGuru.username;
+            dataGuru = await getDataFromReference(dataSesi.guru);
           }
           if(dataSesi.murid[0]){
-            namaMurid = '';
-            let namaMuridLen = dataSesi.murid.length;
-            console.log("banyaknya murid = "+namaMuridLen);
-            for(let i=0;i<namaMuridLen;i++){
-              let dataMurid = await getDataFromReference(dataSesi.murid[i]);
-              if(i === namaMuridLen-1){
-                namaMurid += (''+dataMurid.username);
-              }else{
-                namaMurid += (''+dataMurid.username+', ');
-              }
+            for(let murid of dataSesi.murid){
+              let tempDataMurid = await getDataFromReference(murid);
+              dataMurid.push(tempDataMurid);
             }
           }
   
           if(dataSesi.mapel[0]){
               mataPelajaran = '';
               let mapelLen = dataSesi.mapel.length;
-              console.log("banyaknya mapel = "+mapelLen);
               for(let i=0;i<mapelLen;i++){
                   if(i === mapelLen-1){
                       mataPelajaran += (''+dataSesi.mapel[i]);
@@ -86,7 +77,7 @@ export async function firebaseQueryDashboard(isAdmin,emailSearch){
                   }
               }
           }
-          dashboardData.push(createData(dataSesi.nama_sesi, namaGuru, dataSesi.kelas, mataPelajaran, namaMurid));
+          dashboardData.push(createData(dataSesi.nama_sesi, dataGuru, dataSesi.kelas, mataPelajaran, dataMurid));
         }
       }
       
@@ -101,6 +92,17 @@ export async function firebaseQueryDashboard(isAdmin,emailSearch){
   }
 }
 
+export async function firebaseQueryCollection(collectionName){
+  const querySnapshot = await firebase.firestore().collection(collectionName).get();
+  let dataList=[];
+  querySnapshot.forEach(function(snapshot){
+    dataList.push(snapshot.data());
+  });
+  dataList.sort((a, b) => (a.key < b.key ? -1 : 1));
+  console.log('list datanya = '+JSON.stringify(dataList));
+  return dataList;
+}
+
 function getDataFromReference(reference){
   return new Promise(function(resolve,reject){
     reference.get().then(function(sample){
@@ -112,8 +114,9 @@ function getDataFromReference(reference){
 }
 
 function createData(sesi, guru, kelas, mapel, murid) {
-  counter += 1;
-  return { id: counter, sesi, guru, kelas, mapel, murid};
+  const data = { id: counter, sesi, guru, kelas, mapel, murid};
+  ++counter;
+  return data;
 }
 
 //================================== Registration ===================================

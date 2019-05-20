@@ -41,9 +41,45 @@ export function closeMessage() {
     }
 }
 
-export function handlePopup(open){
+export function queryCourseList(isAdmin,email){
+    return{
+        type: 'COURSES',
+        isAdmin,
+        email
+    }
+}
+
+export function queryGuru(){
+    return{
+        type: 'TEACHERS'
+    }
+}
+
+export function querySiswa(){
+    return{
+        type: 'STUDENTS'
+    } 
+}
+
+export function queryMapel(){
+    return{
+        type: 'SUBJECTS'
+    }
+}
+
+export function queryKelas(){
+    return{
+        type: 'CLASS'
+    }
+}
+
+export function handlePopup(popupOpen,popupTitle,popupOptions1,popupOptions2,popupContent){
     return{
         type:'POPUP',
-        open
+        popupOpen,
+        popupTitle,
+        popupOptions1,
+        popupOptions2,
+        popupContent,
     }
 }

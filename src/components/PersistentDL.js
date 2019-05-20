@@ -5,6 +5,9 @@ import classNames from 'classnames';
 import { withRouter, Route, Switch, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
+import {bindActionCreators} from 'redux';
+import {queryCourseList,queryMapel,queryGuru,querySiswa,queryKelas,handlePopup} from '../store/Actions';
+
 //material-ui components
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -25,6 +28,10 @@ import Pembayaran from './pages/Pembayaran';
 import Login from './LogIn';
 import Register from './Register';
 import Messages from './Messages';
+import DaftarGuru from './pages/DaftarGuru';
+import DaftarKelas from './pages/DaftarKelas';
+import DaftarPelajaran from './pages/DaftarPelajaran';
+import DaftarSiswa from './pages/DaftarSiswa';
 
 //images & icons
 import AlmasLogo from '../media/logo-almastutoring.png';
@@ -36,8 +43,10 @@ import HowToRegIcon from '@material-ui/icons/HowToReg';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import HomeIcon from '@material-ui/icons/Home';
 import MoneyIcon from '@material-ui/icons/MonetizationOn';
-import DownloadIcon from '@material-ui/icons/CloudDownload';
-
+import PeopleIcon from '@material-ui/icons/People';
+import PeopleOutlineIcon from '@material-ui/icons/PeopleOutline';
+import SchoolIcon from '@material-ui/icons/School';
+import LibraryIcon from '@material-ui/icons/LocalLibrary';
 //========================================DRAWER=====================================================
 const drawerWidth = 220;
 const styles = theme => ({
@@ -116,6 +125,38 @@ class PersistentDrawerLeft extends React.Component {
     };
   }
 
+  openLinkDashboard = () => {
+    if(this.props.rows.length === 0){
+      this.props.queryCourseList(this.props.isAdmin,this.props.email);
+    }else{
+
+    }
+  }
+
+  openLinkGuru = () => {
+    if(this.props.guru.length === 0){
+      this.props.queryGuru();
+    }
+  }
+
+  openLinkSiswa = () => {
+    if(this.props.siswa.length === 0){
+      this.props.querySiswa();
+    }
+  }
+
+  openLinkKelas = () => {
+    if(this.props.kelas.length === 0){
+      this.props.queryKelas();
+    }
+  }
+
+  openLinkMapel = () => {
+    if(this.props.mapel.length === 0){
+      this.props.queryMapel();
+    }
+  }
+
   handleDrawerOpen = () => {
     if(this.props.isUser){
       this.setState({ open: true });
@@ -192,9 +233,9 @@ class PersistentDrawerLeft extends React.Component {
                 <ListItemText primary="Profil Saya" />
               </ListItemLink>
             
-              <ListItemLink to='/dashboard'>
+              <ListItemLink to='/dashboard' onClick={this.openLinkDashboard}>
                 <ListItemIcon><HowToRegIcon /></ListItemIcon>
-                <ListItemText primary="Daftar Kelas" />
+                <ListItemText primary="Course List" />
               </ListItemLink>
             
               <ListItemLink to='/perkembangan' >
@@ -205,11 +246,23 @@ class PersistentDrawerLeft extends React.Component {
               <ListItemLink to='/pembayaran'>
                 <ListItemIcon><MoneyIcon /></ListItemIcon>
                 <ListItemText primary="Pembayaran Siswa" />
+              </ListItemLink>              
+              <ListItemLink to='/daftarguru' onClick={this.openLinkGuru}>
+                <ListItemIcon><PeopleOutlineIcon /></ListItemIcon>
+                <ListItemText primary="Daftar Guru" />
               </ListItemLink>
-              <ListItem button>
-                <ListItemIcon><DownloadIcon /></ListItemIcon>
-                <ListItemText primary="Download" />
-              </ListItem>
+              <ListItemLink to='/daftarsiswa' onClick={this.openLinkSiswa}>
+                <ListItemIcon><PeopleIcon /></ListItemIcon>
+                <ListItemText primary="Daftar Siswa" />
+              </ListItemLink>
+              <ListItemLink to='/daftarkelas' onClick={this.openLinkKelas}>
+                <ListItemIcon><SchoolIcon /></ListItemIcon>
+                <ListItemText primary="Daftar Kelas" />
+              </ListItemLink>
+              <ListItemLink to='/daftarpelajaran' onClick={this.openLinkMapel}>
+                <ListItemIcon><LibraryIcon /></ListItemIcon>
+                <ListItemText primary="Daftar Pelajaran" />
+              </ListItemLink>  
             </List>            
         </Drawer>
         
@@ -224,6 +277,10 @@ class PersistentDrawerLeft extends React.Component {
             <Route path ='/dashboard' component={Dashboard} />
             <Route path ='/perkembangan' component={Perkembangan} />
             <Route path ='/pembayaran' component={Pembayaran} />
+            <Route path ='/daftarguru' component={DaftarGuru}/>
+            <Route path ='/daftarsiswa' component={DaftarSiswa}/>
+            <Route path ='/daftarkelas' component={DaftarKelas}/>
+            <Route path ='/daftarpelajaran' component={DaftarPelajaran}/>
           </Switch>
           
         </main>
@@ -241,9 +298,24 @@ PersistentDrawerLeft.propTypes = {
 const mapStateToProps = (state) => {
   return {
     isUser: state.isUser,
-    email: state.email
+    isAdmin: state.isAdmin,
+    email: state.email,
+    guru: state.guru,
+    siswa: state.siswa,
+    kelas: state.kelas,
+    mapel: state.mapel,
+    rows: state.rows
+    // rowsQueried: state.rowsQueried,
+    // guruQueried: state.guruQueried,
+    // siswaQueried: state.siswaQueried,
+    // kelasQueried: state.kelasQueried,
+    // mapelQueried: state.mapelQueried,
   }
 }
 
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({queryCourseList,queryMapel,queryGuru,querySiswa,queryKelas,handlePopup},dispatch);
+}
+
 const PersistentDL = withStyles(styles, { withTheme: true })(PersistentDrawerLeft);
-export default withRouter(connect(mapStateToProps)(PersistentDL));
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(PersistentDL));

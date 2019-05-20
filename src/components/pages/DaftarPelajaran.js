@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -15,21 +14,24 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
-import {queryCourseList,handlePopup} from '../../store/Actions';
+import {queryMapel,handlePopup} from '../../store/Actions';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
 import PopupWindow from './PopupWindow';
-import TambahSesiWindow from './TambahSesiWindow';
 
+const popupString = [
+    {index:0,content:'Anda akan mengubah'},
+    {index:1,content:'data pelajaran tersebut?'},   
+];
 
 const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
     color: theme.palette.text.secondary,
-    // marginLeft: theme.spacing.unit * 2.5,
   },
 });
 
@@ -110,11 +112,11 @@ const CustomTableCell = withStyles(theme => ({
     backgroundColor: '#F9BE02',
     color: theme.palette.common.white,
     fontSize: 14,
-    align:'center',
+    alignItems:'center',
   },
   body: {
     fontSize: 12,
-    align:'center',
+    alignItems:'center',
   },
 }))(TableCell);
 
@@ -135,94 +137,74 @@ class CustomPaginationActionsTable extends React.Component {
   };
 
   render() {
-    const { classes,isAdmin,email } = this.props;
+    const { classes } = this.props;
     const { rowsPerPage, page} = this.state;
-    const tableRows = this.props.rows;
+    const dataPelajaran = this.props.mapel;
+    let jumlahRow = page * rowsPerPage + 1;
+    if(dataPelajaran){
+        const emptyRows = rowsPerPage - Math.min(rowsPerPage, dataPelajaran.length - page * rowsPerPage);
+        //labibfardany
+        return (
+            !this.props.isUser?
+            null:
+            <div>
+            <Paper className={classes.root}>
+            <div className={classes.tableWrapper}>
+                <Table className={classes.table}>
+                <TableHead>
+                    <TableRow>
+                    <CustomTableCell >No</CustomTableCell>
+                    <CustomTableCell >Nama Pelajaran</CustomTableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {
+                    //sesi, mapel, kelas, mapel, murid}
+                    dataPelajaran.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                    <TableRow key={row.key}>
+                        <CustomTableCell >{jumlahRow++}</CustomTableCell>
+                        <CustomTableCell component="th" scope="row" >
+                            <Button fullWidth onClick={() => this.props.handlePopup(true,row.value,'Edit','Hapus',popupString)}>
+                            {row.value}
+                            </Button>
+                        </CustomTableCell>
+                    </TableRow>
+                    ))
+                    }
+                    {emptyRows > 0 && (
+                    <TableRow style={{ height: 48 * emptyRows }}>
+                        <CustomTableCell colSpan={6} />
+                    </TableRow>
+                    )}
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        colSpan={3}
+                        count={dataPelajaran.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        SelectProps={{
+                        native: true,
+                        }}
+                        onChangePage={this.handleChangePage}
+                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                        ActionsComponent={TablePaginationActionsWrapped}
+                    />
+                    </TableRow>
+                </TableFooter>
+                </Table>
+            </div>
+            </Paper>
+            <Fab aria-label="Add" className={classes.refreshBtn} onClick={this.props.queryMapel}>
+                <RefreshIcon />
+            </Fab>
+            <PopupWindow/>
+            </div>
+        );
+    }else{
 
-    if(tableRows){
-      const emptyRows = rowsPerPage - Math.min(rowsPerPage, tableRows.length - page * rowsPerPage);
-      let namaMurid = [];
-      for(let row of tableRows){
-        let namaMuridPerRow = [];
-        if(row.murid.length > 1){
-          namaMuridPerRow.push({index:0,content:'Jumlah Siswa: '+ row.murid.length + ' (Kelompok)'});
-          let counter=1;
-          for(let individu of row.murid){
-            namaMuridPerRow.push({index: counter, content: individu.username});
-            // console.log('username = '+JSON.stringify(individu));
-            ++counter;
-          }
-        }else{
-          namaMuridPerRow.push({index: 0, content:'Jumlah Siswa: 1 (Individu)'});
-          namaMuridPerRow.push({index: 1, content: row.murid[0].username});
-        }
-        namaMurid.push(namaMuridPerRow);
-      }
-      //labibfardany
-      return (
-        !this.props.isUser?
-        null:
-        <div>
-        <Paper className={classes.root}>
-          <div className={classes.tableWrapper}>
-            <Table className={classes.table}>
-              <TableHead>
-                <TableRow>
-                  <CustomTableCell >Course</CustomTableCell>
-                  <CustomTableCell >Guru</CustomTableCell>
-                  <CustomTableCell >Kelas</CustomTableCell>
-                  <CustomTableCell >Mata Pelajaran</CustomTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {
-                  //sesi, guru, kelas, mapel, murid}
-                  tableRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-                  <TableRow key={row.id}>
-                    <CustomTableCell component="th" scope="row" >
-                      <Button fullWidth onClick={() => this.props.handlePopup(true,row.sesi,'Mengajar','Laporan Kehadiran',namaMurid[row.id])}>
-                        {row.sesi}
-                      </Button>
-                    </CustomTableCell>
-                    <CustomTableCell >{row.guru.username}</CustomTableCell>
-                    <CustomTableCell >{row.kelas}</CustomTableCell>
-                    <CustomTableCell >{row.mapel}</CustomTableCell>
-                  </TableRow>
-                  ))
-                }
-                {emptyRows > 0 && (
-                  <TableRow style={{ height: 48 * emptyRows }}>
-                    <CustomTableCell colSpan={6} />
-                  </TableRow>
-                )}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={3}
-                    count={tableRows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                    ActionsComponent={TablePaginationActionsWrapped}
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </div>
-        </Paper>
-        <TambahSesiWindow/>
-        <Fab aria-label="Add" className={classes.refreshBtn} onClick={()=>this.props.queryCourseList(isAdmin,email)}>
-          <RefreshIcon />
-        </Fab>
-        <PopupWindow/>
-        </div>
-      );
     }
   }
 }
@@ -247,11 +229,11 @@ const styles = theme => ({
     color:'#FFFFFF',
     position: 'fixed',
     bottom: theme.spacing.unit * 2,
-    right: theme.spacing.unit * 10, 
+    right: theme.spacing.unit * 2, 
   }
 });
 
-const Dashboard = withStyles(styles)(CustomPaginationActionsTable);
+const DaftarPelajaran = withStyles(styles)(CustomPaginationActionsTable);
 
 
 
@@ -259,16 +241,14 @@ const Dashboard = withStyles(styles)(CustomPaginationActionsTable);
 const mapStateToProps = (state) => {
   return {
     isUser: state.isUser,
-    rows: state.rows,
-    email: state.email,
-    isAdmin: state.isAdmin
+    mapel: state.mapel
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({queryCourseList,handlePopup},dispatch);
+  return bindActionCreators({queryMapel,handlePopup},dispatch);
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(Dashboard);
+export default connect(mapStateToProps,mapDispatchToProps)(DaftarPelajaran);
 
 

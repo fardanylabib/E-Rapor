@@ -3,7 +3,8 @@ import {  firebaseSignIn,
           firebaseSignOut,
           firebaseRegistration,
           firebaseCheckPhoneExist,
-          firebaseQueryDashboard
+          firebaseQueryDashboard,
+          firebaseQueryCollection
         } from './FirebaseAPI';
 
 const ADMIN_EMAIL = 'labibfardany@gmail.com';
@@ -28,10 +29,6 @@ function* signIn(action){
         yield put({type:'USER_LOGIN',login:false,isAdmin:false, email:''}); 
         yield put({type:'MESSAGE', variation:'warning', content:'Email belum diverifikasi, mohon verifikasi dengan klik link verifikasi di email yang anda daftarkan'});
       }
-      //query dashboard data after sign in
-      let tempRows = yield call(firebaseQueryDashboard,admin,action.email);
-      console.log(JSON.stringify(tempRows));
-      yield put({type:'DASHBOARD_DATA', rows:tempRows});
     }catch(error){
       yield put({type:'USER_LOGIN',login:false,isAdmin:false, email:''}); 
       console.log("error disini lo");
@@ -75,7 +72,7 @@ function* handleRegister(action){
   console.log('masuk handle register saga');
   try{
     const registerStatus = yield call(firebaseRegistration,action);
-    if(registerStatus == OK){
+    if(registerStatus === OK){
       yield put({type: 'MESSAGE', variation: 'success', content:'User telah berhasil dibuat, silahkan buka email aktivasi untuk mengaktifkan. Setelah itu, klik tombol "Konfirmasi Verifikasi".'});
       yield put({type: 'REG_SUCCESS', notRegistering: true});
     }else{
@@ -87,10 +84,71 @@ function* handleRegister(action){
   }
 }
 
+function* queryCourses(action){
+  try{
+    //query dashboard data after sign in
+    let tempRows = yield call(firebaseQueryDashboard,action.isAdmin,action.email);
+    yield put({type:'DASHBOARD_DATA', rows:tempRows});
+  }catch(error){
+    let errorMessage = 'Courses Query Failed' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
+function* queryGuru(){
+  try{
+    //query dashboard data after sign in
+    let tempRows = yield call(firebaseQueryCollection,'guru');
+    yield put({type:'GURU_DATA', guru:tempRows});
+  }catch(error){
+    let errorMessage = 'Courses Query Failed' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
+function* queryClasses(){
+  try{
+    console.log("class query")
+    //query dashboard data after sign in
+    let tempRows = yield call(firebaseQueryCollection,'master_kelas');
+    yield put({type:'CLASS_DATA', kelas:tempRows});
+  }catch(error){
+    let errorMessage = 'Classes Query Failed' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
+function* querySiswa(){
+  try{
+    //query dashboard data after sign in
+    let tempRows = yield call(firebaseQueryCollection,'murid');
+    yield put({type:'STUDENT_DATA', siswa:tempRows});
+  }catch(error){
+    let errorMessage = 'Student Query Failed' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
+function* queryMapel(){
+  try{
+    //query dashboard data after sign in
+    let tempRows = yield call(firebaseQueryCollection,'master_mapel');
+    yield put({type:'MAPEL_DATA', mapel:tempRows});
+  }catch(error){
+    let errorMessage = 'Subjects Query Failed' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
 export default function* rootSaga() {
   yield all([
     takeLatest('SIGN_IN', signIn),
     takeLatest('SIGN_OUT', signOut),
-    takeLatest('REGISTER', handleRegister)
+    takeLatest('REGISTER', handleRegister),
+    takeLatest('COURSES', queryCourses),
+    takeLatest('TEACHERS', queryGuru),
+    takeLatest('CLASS', queryClasses),
+    takeLatest('SUBJECTS', queryMapel),
+    takeLatest('STUDENTS', querySiswa),
   ]);
 }

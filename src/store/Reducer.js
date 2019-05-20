@@ -12,9 +12,24 @@ const initialState = {
 
     //popups
     popupOpen:false,
-
+    popupTitle:'',
+    options1:'',
+    options2:'',
+    popupContent:'',
+    
     //dashboard states
     rows: [],
+    guru: [],
+    siswa: [],
+    kelas: [],
+    mapel: [],
+
+    //states for add course
+    courseName:'',
+    selectedClass:'',
+    selectedGuru:'',
+    selectedMapel:[],
+    selectedMurid:[]
 }
 
 function reducer(state = initialState, action){
@@ -61,6 +76,34 @@ function reducer(state = initialState, action){
                 ...state,
                 rows: action.rows,
             }
+        case 'GURU_DATA':
+            console.log('teacher query done');
+            return{
+                ...state,
+                guru: action.guru,
+                guruQueried:true
+            }
+        case 'STUDENT_DATA':
+            console.log('teacher query done');
+            return{
+                ...state,
+                siswa: action.siswa,
+                siswaQueried:true
+            }
+        case 'CLASS_DATA':
+            console.log('teacher query done');
+            return{
+                ...state,
+                kelas: action.kelas,
+                kelasQueried: true
+            }  
+        case 'MAPEL_DATA':
+            console.log('teacher query done');
+            return{
+                ...state,
+                mapel: action.mapel,
+                mapelQueried: true
+            }      
         case 'REG_SUCCESS':
             console.log('REGISTER SUCCESS');
             return{
@@ -70,7 +113,11 @@ function reducer(state = initialState, action){
         case 'POPUP':
             return{
                 ...state,
-                popupOpen:action.open
+                popupOpen: action.popupOpen,
+                popupTitle: action.popupTitle,
+                popupOptions1: action.popupOptions1,
+                popupOptions2: action.popupOptions2,
+                popupContent: action.popupContent
             }
         default:
           return state;
