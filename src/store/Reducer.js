@@ -13,10 +13,11 @@ const initialState = {
     //popups
     popupOpen:false,
     popupTitle:'',
-    options1:'',
-    options2:'',
+    popupOptions1:'',
+    popupOptions2:'',
     popupContent:'',
-    
+    docId:'',
+
     //dashboard states
     rows: [],
     guru: [],
@@ -36,7 +37,7 @@ function reducer(state = initialState, action){
     switch (action.type){
         case 'SIGN_IN':
         case 'SIGN_OUT':
-        case 'REGISTER':
+        case 'REGISTER':   
             return state;
             // return {
             //     ...state,
@@ -117,7 +118,13 @@ function reducer(state = initialState, action){
                 popupTitle: action.popupTitle,
                 popupOptions1: action.popupOptions1,
                 popupOptions2: action.popupOptions2,
-                popupContent: action.popupContent
+                popupContent: action.popupContent,
+                docId: action.docId
+            }
+        case 'POPUP_CANCEL':
+            return{
+                ...state,
+                popupOpen: false,
             }
         default:
           return state;

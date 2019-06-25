@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
+
+import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
 
 const styles = theme => ({
   button: {
@@ -70,4 +71,17 @@ DropdownList.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(DropdownList);
+//redux
+const DropdownListMenu = withStyles(styles)(DropdownList);
+
+const mapStateToProps = (state) => {
+  return {
+    selectionList: state.selectionList,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(setState,dispatch);
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(DropdownListMenu);

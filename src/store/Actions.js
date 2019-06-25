@@ -14,7 +14,6 @@ export function handleSignOut() {
 }
 
 export function handleRegister(mailVal,passVal,nameVal,phoneVal,addrVal,instVal){
-    console.log('user registration');
     return{
         type: 'REGISTER',
         mailVal,
@@ -73,7 +72,14 @@ export function queryKelas(){
     }
 }
 
-export function handlePopup(popupOpen,popupTitle,popupOptions1,popupOptions2,popupContent){
+export function tambahSesi(courseName,guruPilihan,siswaPilihan,kelasPilihan,mapelPilihan){
+    return{
+        type: 'NEW_SESSION',
+        courseName,guruPilihan,siswaPilihan,kelasPilihan,mapelPilihan
+    }
+}
+
+export function handlePopup(popupOpen,popupTitle,popupOptions1,popupOptions2,popupContent,docId){
     return{
         type:'POPUP',
         popupOpen,
@@ -81,5 +87,30 @@ export function handlePopup(popupOpen,popupTitle,popupOptions1,popupOptions2,pop
         popupOptions1,
         popupOptions2,
         popupContent,
+        docId
+    }
+}
+
+export function handlePopupCancel(coba){
+    return{
+        type:'POPUP_CANCEL',
+    }
+}
+
+export function handleOptions1(popupOptions1,docId,email,isAdmin){
+    return{
+        type:'BUTTON_1',
+        popupOptions1,
+        docId,
+        email,
+        isAdmin
+    }
+}
+
+export function handleOptions2(popupOptions2){
+    console.log('masuk options 2 action')
+    return{
+        type:'BUTTON_2',
+        popupOptions2,
     }
 }

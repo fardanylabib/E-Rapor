@@ -7,19 +7,25 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
 
+import FormControl from '@material-ui/core/FormControl';
+import Checkbox from '@material-ui/core/Checkbox';
+import ListItemText from '@material-ui/core/ListItemText';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-// import { connect } from 'react-redux';
-// import {bindActionCreators} from 'redux';
+import { connect } from 'react-redux';
+import {bindActionCreators} from 'redux';
 import AddIcon from '@material-ui/icons/Add';
-// import * as Actions from '../store/Actions';
+import {queryGuru,queryKelas,queryMapel,querySiswa,tambahSesi} from '../../store/Actions';
 import Fab from '@material-ui/core/Fab';
-import DropdownList from '../DropdownList';
 
 const styles = theme => ({
   appBar: {
@@ -30,23 +36,41 @@ const styles = theme => ({
     flex: 1,
   },
   okbutton: {
-    color:'#ffffff',
-    background: '#F53240',
+    background:'#F53240',
+    '&:hover': {
+      background: '#c61d29',
+    },
+    color:'#FFFFFF',
   },
   cancelbutton: {
     color:'#F53240',
   },
   add: {
-    backgroundColor:'#F53240',
+    background:'#F53240',
     '&:hover': {
-      backgroundColor: '#c61d29',
+      background: '#c61d29',
     },
     color:'#FFFFFF',
     position: 'fixed',
     bottom: theme.spacing.unit * 2,
     right: theme.spacing.unit * 2, 
   },
+  formControl: {
+    margin: theme.spacing.unit,
+    width: '45%',
+  },
 });
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 function Transition(props) {
   return <Slide direction='up' {...props} />;
@@ -55,46 +79,62 @@ function Transition(props) {
 class TambahSesi extends React.Component {
   
     constructor(props) {
-      super(props)
-
-      // Bind the this context to the handler function
-      // this.selectGuru = this.selectGuru.bind(this);
-      // this.selectKelas = this.selectKelas.bind(this);
-      // this.selectMapel = this.selectMapel.bind(this);
-      // this.selectSiswa = this.selectSiswa.bind(this);
-
+      super(props);
       // Set some state
       this.state = {
         open: false,
+        openListGuru:false,
+        openListKelas: false,
         courseName:'',
-        kelas:'',
-        mapel: '',
-        siswa: '',
-        guru: '',
-        dateCreated: '',
-        jenisKelas: [
-          {key:0,value:'Calistung'},
-          {key:1,value:'1-3 SD'},
-          {key:2,value:'4-6 SD'},
-          {key:3,value:'7-8 SMP'},
-          {key:4,value:'9 SMP'},
-          {key:5,value:'10-11 SMA'},
-          {key:6,value:'12 SMA'},
-          {key:7,value:'SBMPTN'}],  
-      };
+        guruPilihan:'',
+        kelasPilihan:'',
+        siswaPilihan:[],
+        mapelPilihan:[], 
+      }
     }
 
   handleOpen = () => {
     this.setState({ open: true });
+    if(this.props.guru.length === 0){
+      //guru belum diquery
+      this.props.queryGuru();
+    }
+    if(this.props.guru.length === 0){
+      //siswa belum diquery
+      this.props.querySiswa();
+    }
+    if(this.props.guru.length === 0){
+      //kelas belum diquery
+      this.props.queryKelas();
+    }
+    if(this.props.guru.length === 0){
+      //mapel belum diquery
+      this.props.queryMapel();
+    }
   };
 
   handleClose = () => {
     this.setState({ open: false });
   };
 
+  handleChange = event => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  handleChangePilihSiswa = event => {
+    this.setState({ siswaPilihan: event.target.value });
+  };
+
+  handleChangePilihMapel = event => {
+    this.setState({ mapelPilihan: event.target.value });
+  };
+
   render() {
-    const { classes} = this.props;
-    const {courseName,kelas,mapel,siswa,guru,dateCreated,jenisKelas} = this.state;
+    const { classes, guru, siswa, kelas, mapel} = this.props;
+    const {open, courseName, openListGuru, openListKelas,
+            guruPilihan, siswaPilihan,mapelPilihan,kelasPilihan,} = this.state;
+    console.log('Siswa Pilihan : '+JSON.stringify(this.state.siswaPilihan));
+    console.log('Mapel Pilihan : '+JSON.stringify(this.state.mapelPilihan));
     return (
       <div>
         <Fab aria-label="Add" className={classes.add} onClick={this.handleOpen}>
@@ -102,7 +142,7 @@ class TambahSesi extends React.Component {
         </Fab>
         <Dialog
           fullScreen
-          open={this.state.open}
+          open={open}
           onClose={this.handleClose}
           TransitionComponent={Transition}
         >
@@ -121,17 +161,135 @@ class TambahSesi extends React.Component {
             <br/>
             <br/>
             <TextField autoFocus margin='dense' id = 'courseName' label='Nama Course' type='text' value={courseName} onChange={e => this.setState({ courseName: e.target.value })} fullWidth/>
-            <DropdownList title='Kelas'   values = {jenisKelas}/>
-            <DropdownList title='Guru'    values = {jenisKelas}/>
-            <TextField margin='dense'     id ='mapel'     label='Mata Pelajaran'  type='text' value={mapel}   onChange={e => this.setState({ mapel: e.target.value })} fullWidth/>                
-            <TextField margin='dense'     id ='guru'        label='Pengajar'      type='text'  value={guru}  onChange={e => this.setState({ guru: e.target.value })} fullWidth/>
-            <TextField margin='dense'     id ='murid'      label='Siswa'        type='text' value={siswa}   onChange={e => this.setState({ siswa: e.target.value })} fullWidth/>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="drop-down-list-1">Pilih Guru</InputLabel>
+              <Select
+                open={openListGuru}
+                onClose={() => this.setState({openListGuru:false})}
+                onOpen={() => this.setState({openListGuru:true})}
+                onChange={this.handleChange}
+                value={guruPilihan}
+                inputProps={{
+                  name: 'guruPilihan',
+                  id: 'drop-down-list-1',
+                }}
+              >
+                <MenuItem value=""/>
+                {
+                    guru.map(data => 
+                        <MenuItem key={data.key} value={data.username}>{data.username}</MenuItem>
+                    )
+                }
+              </Select>
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="drop-down-list-3">Pilih Kelas</InputLabel>
+              <Select
+                open={openListKelas}
+                onClose={() => this.setState({openListKelas:false})}
+                onOpen={() => this.setState({openListKelas:true})}
+                onChange={this.handleChange}
+                value={kelasPilihan}
+                inputProps={{
+                  name: 'kelasPilihan',
+                  id: 'drop-down-list-3',
+                }}
+              >
+                <MenuItem value=""/>
+                {
+                    kelas.map(data => 
+                        <MenuItem key={data.key} value={data.value}>{data.value}</MenuItem>
+                    )
+                }
+              </Select>
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="select-multiple-checkbox">Pilih Siswa</InputLabel>
+              <Select
+                multiple
+                value={siswaPilihan}
+                onChange={this.handleChangePilihSiswa}
+                input={<Input id="select-multiple-checkbox" />}
+                renderValue={selected => selected.join(', ')}
+                MenuProps={MenuProps}
+              >
+                {siswa.map(data => (
+                  <MenuItem key={data.key} value={data.username}>
+                    <Checkbox checked={siswaPilihan.indexOf(data.username) > -1} />
+                    <ListItemText primary={data.username} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+{/*             
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="drop-down-list-2">Pilih Siswa</InputLabel>
+              <Select
+                open={openListSiswa}
+                onClose={() => this.setState({openListSiswa:false})}
+                onOpen={() => this.setState({openListSiswa:true})}
+                onChange={this.handleChange}
+                value={siswaPilihan}
+                inputProps={{
+                  name: 'siswaPilihan',
+                  id: 'drop-down-list-2',
+                }}
+              >
+                <MenuItem value=""/>
+                {
+                    siswa.map(data => 
+                        <MenuItem key={data.key} value={data.username}>{data.username}</MenuItem>
+                    )
+                }
+              </Select>
+            </FormControl> */}
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="select-multiple-checkbox-1">Pilih Pelajaran</InputLabel>
+              <Select
+                multiple
+                value={mapelPilihan}
+                onChange={this.handleChangePilihMapel}
+                input={<Input id="select-multiple-checkbox-1" />}
+                renderValue={selected => selected.join(', ')}
+                MenuProps={MenuProps}
+              >
+                {mapel.map(data => (
+                  <MenuItem key={data.key} value={data.value}>
+                    <Checkbox checked={mapelPilihan.indexOf(data.value) > -1} />
+                    <ListItemText primary={data.value} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="drop-down-list-4">Pilih Pelajaran</InputLabel>                
+              <Select
+                open={openListMapel}
+                onClose={() => this.setState({openListMapel:false})}
+                onOpen={() => this.setState({openListMapel:true})}
+                onChange={this.handleChange}
+                value={mapelPilihan}
+                inputProps={{
+                  name: 'mapelPilihan',
+                  id: 'drop-down-list-4',
+                }}
+              >
+                <MenuItem value=""/>
+                {
+                    mapel.map(data => 
+                        <MenuItem key={data.key} value={data.value}>{data.value}</MenuItem>
+                    )
+                }
+              </Select>
+            </FormControl> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} className={classes.cancelbutton} size='large' >
               Cancel
             </Button>
             <Button 
+              onClick={() => this.props.tambahSesi(courseName,guruPilihan,siswaPilihan,kelasPilihan,mapelPilihan)}
               className={classes.okbutton} 
               variant='contained' 
               size='large'>
@@ -148,16 +306,18 @@ TambahSesi.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 const TambahSesiWindow = withStyles(styles)(TambahSesi);
-export default TambahSesiWindow;
 // //==================================redux======================================
-// const mapStateToProps = (state) => {
-//   return {
-//     notRegistering: state.notRegistering
-//   }
-// }
+const mapStateToProps = (state) => {
+  return {
+    guru: state.guru,
+    siswa: state.siswa,
+    kelas: state.kelas,
+    mapel: state.mapel
+  }
+}
 
-// const mapDispatchToProps = (dispatch) => {
-//   return bindActionCreators(Actions,dispatch);
-// }
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({queryGuru,queryKelas,queryMapel,querySiswa,tambahSesi},dispatch);
+}
 
-// export default connect(mapStateToProps,mapDispatchToProps)(TambahSesiWindow);
+export default connect(mapStateToProps,mapDispatchToProps)(TambahSesiWindow);

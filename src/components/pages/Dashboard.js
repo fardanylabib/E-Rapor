@@ -105,16 +105,17 @@ const TablePaginationActionsWrapped = withStyles(actionsStyles, { withTheme: tru
 );
 
 const CustomTableCell = withStyles(theme => ({
-  
   head: {
     backgroundColor: '#F9BE02',
     color: theme.palette.common.white,
     fontSize: 14,
     align:'center',
+    padding: 'dense'
   },
   body: {
     fontSize: 12,
     align:'center',
+    padding: 'dense'
   },
 }))(TableCell);
 
@@ -135,36 +136,35 @@ class CustomPaginationActionsTable extends React.Component {
   };
 
   render() {
-    const { classes,isAdmin,email } = this.props;
+    const { classes,isAdmin,email,rows } = this.props;
     const { rowsPerPage, page} = this.state;
-    const tableRows = this.props.rows;
 
-    if(tableRows){
-      const emptyRows = rowsPerPage - Math.min(rowsPerPage, tableRows.length - page * rowsPerPage);
+    if(rows){
+      const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
       let namaMurid = [];
-      for(let row of tableRows){
+      for(let row of rows){
         let namaMuridPerRow = [];
         if(row.murid.length > 1){
-          namaMuridPerRow.push({index:0,content:'Jumlah Siswa: '+ row.murid.length + ' (Kelompok)'});
+          namaMuridPerRow.push({key:0,content:'Jumlah Siswa: '+ row.murid.length + ' (Kelompok)'});
           let counter=1;
           for(let individu of row.murid){
-            namaMuridPerRow.push({index: counter, content: individu.username});
-            // console.log('username = '+JSON.stringify(individu));
-            ++counter;
+            namaMuridPerRow.push({key: counter, content: individu});
+            counter++;
           }
         }else{
-          namaMuridPerRow.push({index: 0, content:'Jumlah Siswa: 1 (Individu)'});
-          namaMuridPerRow.push({index: 1, content: row.murid[0].username});
+          namaMuridPerRow.push({key: 0, content:'Jumlah Siswa: 1 (Individu)'});
+          namaMuridPerRow.push({key: 1, content: row.murid[0]});
         }
         namaMurid.push(namaMuridPerRow);
       }
+      console.log('muridnya = '+JSON.stringify(namaMurid));
       //labibfardany
       return (
         !this.props.isUser?
         null:
         <div>
-        <Paper className={classes.root}>
-          <div className={classes.tableWrapper}>
+        <Paper >
+          <div >
             <Table className={classes.table}>
               <TableHead>
                 <TableRow>
@@ -177,14 +177,14 @@ class CustomPaginationActionsTable extends React.Component {
               <TableBody>
                 {
                   //sesi, guru, kelas, mapel, murid}
-                  tableRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                  rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                   <TableRow key={row.id}>
                     <CustomTableCell component="th" scope="row" >
-                      <Button fullWidth onClick={() => this.props.handlePopup(true,row.sesi,'Mengajar','Laporan Kehadiran',namaMurid[row.id])}>
-                        {row.sesi}
+                      <Button fullWidth onClick={() => this.props.handlePopup(true,row.nama_sesi, 'Mengajar','Laporan Kehadiran',namaMurid[row.key],row.id)}>
+                        {row.nama_sesi}
                       </Button>
                     </CustomTableCell>
-                    <CustomTableCell >{row.guru.username}</CustomTableCell>
+                    <CustomTableCell >{row.guru}</CustomTableCell>
                     <CustomTableCell >{row.kelas}</CustomTableCell>
                     <CustomTableCell >{row.mapel}</CustomTableCell>
                   </TableRow>
@@ -192,21 +192,21 @@ class CustomPaginationActionsTable extends React.Component {
                 }
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 48 * emptyRows }}>
-                    <CustomTableCell colSpan={6} />
-                  </TableRow>
+                    <CustomTableCell colSpan={4} />
+                 </TableRow>
                 )}
               </TableBody>
               <TableFooter>
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={3}
-                    count={tableRows.length}
+                    colSpan={2}
+                    count={rows.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
-                    SelectProps={{
-                      native: true,
-                    }}
+                    // SelectProps={{
+                    //   native: true,
+                    // }}
                     onChangePage={this.handleChangePage}
                     onChangeRowsPerPage={this.handleChangeRowsPerPage}
                     ActionsComponent={TablePaginationActionsWrapped}
@@ -232,12 +232,13 @@ CustomPaginationActionsTable.propTypes = {
 };
 
 const styles = theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing.unit,
-  },
+  // root: {
+  //   width: '100%',
+  //   marginTop: theme.spacing.unit,
+  // },
   table: {
-    minWidth: 200,
+    minWidth: 100,
+    padding: 'dense'
   },
   refreshBtn:{
     backgroundColor:'#F9BE02', //yellow

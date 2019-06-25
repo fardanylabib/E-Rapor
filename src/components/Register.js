@@ -17,7 +17,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
-import * as Actions from '../store/Actions';
+import {handleRegister} from '../store/Actions';
 
 const styles = {
   appBar: {
@@ -27,14 +27,17 @@ const styles = {
   flex: {
     flex: 1,
   },
+
   okbutton: {
-    color:'#ffffff',
-    background: '#F9BE02',
+    background:'#F9BE02', //yellow
+    '&:hover': {
+      background: '#ce9d02', //darken yellow
+    },
+    color:'#FFFFFF',
   },
   cancelbutton: {
     color:'#F9BE02',
-    },
-  
+  },
 };
 
 function Transition(props) {
@@ -117,9 +120,11 @@ class Register extends React.Component {
               <Button onClick={this.handleClose} className={classes.cancelbutton} size='large' >
                 Cancel
               </Button>
-              <Button onClick={() => this.props.handleRegister(mailVal,passVal,nameVal,phoneVal,addrVal,instVal)}
-                className={classes.okbutton} 
+              <Button
                 variant='contained' 
+                disabled = {mailVal == '' || passVal == '' || nameVal == '' || phoneVal == ''}
+                className={classes.okbutton} 
+                onClick={() => this.props.handleRegister(mailVal,passVal,nameVal,phoneVal,addrVal,instVal)}
                 size='large'>
                 Register
               </Button>
@@ -144,7 +149,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators(Actions,dispatch);
+  return bindActionCreators({handleRegister},dispatch);
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(Registration);

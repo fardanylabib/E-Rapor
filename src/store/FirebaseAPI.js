@@ -36,87 +36,43 @@ export async function firebaseSignOut(){
 
 //================================== Dashboard Query ===================================
 export async function firebaseQueryDashboard(isAdmin,emailSearch){
-  try{
     let querySnapshot;
-    let dashboardData=[];
     if(isAdmin){
       querySnapshot = await firebase.firestore().collection('sesi').get();
     }else{
       querySnapshot =  await firebase.firestore().collection('sesi').where('email','==',emailSearch).get();
     }
-    if(querySnapshot){
-      let sessionList=[];
-      querySnapshot.forEach(function(snapshot){
-        sessionList.push(snapshot);
-      });
-      for(let session of sessionList){
-        const dataSesi = session.data();
-        if(dataSesi){
-          let mataPelajaran = '-';
-          let dataGuru = null;
-          let dataMurid = [];
-  
-          if(dataSesi.guru){
-            dataGuru = await getDataFromReference(dataSesi.guru);
-          }
-          if(dataSesi.murid[0]){
-            for(let murid of dataSesi.murid){
-              let tempDataMurid = await getDataFromReference(murid);
-              dataMurid.push(tempDataMurid);
-            }
-          }
-  
-          if(dataSesi.mapel[0]){
-              mataPelajaran = '';
-              let mapelLen = dataSesi.mapel.length;
-              for(let i=0;i<mapelLen;i++){
-                  if(i === mapelLen-1){
-                      mataPelajaran += (''+dataSesi.mapel[i]);
-                  }else{
-                      mataPelajaran += (''+dataSesi.mapel[i]+', ');
-                  }
-              }
-          }
-          dashboardData.push(createData(dataSesi.nama_sesi, dataGuru, dataSesi.kelas, mataPelajaran, dataMurid));
-        }
+    let dataList=[];
+    let counter = 0;
+    querySnapshot.forEach(function(snapshot){
+      let snapshotData = snapshot.data();
+      snapshotData['id'] = snapshot.id;
+      snapshotData['key'] = counter++;
+      let mapels = snapshotData['mapel'];
+      let mapelList='';
+      for(let mapel of mapels){
+        mapelList += (mapel + '-');
       }
-      
-      if(dashboardData.length>1){
-        dashboardData.sort((a, b) => (a.sesi < b.sesi ? -1 : 1));
-      }
-      return dashboardData;
-    }
-    return null;
-  }catch(error){
-    throw new Error('Query Error '+error.code + ' | '+error.message);
-  }
+      mapelList = mapelList.trim();
+      snapshotData['mapel'] = mapelList.substring(0,mapelList.length-1);
+      dataList.push(snapshotData);
+    });
+    dataList.sort((a, b) => (a.key < b.key ? -1 : 1));
+    console.log('list data dashboard = '+JSON.stringify(dataList));
+    return dataList;
 }
 
 export async function firebaseQueryCollection(collectionName){
   const querySnapshot = await firebase.firestore().collection(collectionName).get();
   let dataList=[];
   querySnapshot.forEach(function(snapshot){
-    dataList.push(snapshot.data());
+    let snapshotData = snapshot.data();
+    snapshotData['id'] = snapshot.id;
+    dataList.push(snapshotData);
   });
   dataList.sort((a, b) => (a.key < b.key ? -1 : 1));
   console.log('list datanya = '+JSON.stringify(dataList));
   return dataList;
-}
-
-function getDataFromReference(reference){
-  return new Promise(function(resolve,reject){
-    reference.get().then(function(sample){
-      resolve(sample.data());
-    }).catch(function(){
-      reject('Kosong');
-    });
-  });
-}
-
-function createData(sesi, guru, kelas, mapel, murid) {
-  const data = { id: counter, sesi, guru, kelas, mapel, murid};
-  ++counter;
-  return data;
 }
 
 //================================== Registration ===================================
@@ -161,7 +117,7 @@ async function processUserInfo(action){
   try{
     console.log('masuk process user info saga');
     await firebase.firestore().collection('guru').doc(action.mailVal).set({
-      nama: action.nameVal,
+      username: action.nameVal,
       no_hp: action.phoneVal,
       alamat: action.addrVal,
       institusi: action.instVal
@@ -171,3 +127,28 @@ async function processUserInfo(action){
     throw new Error(DATABASE_WRITE_FAILED);
   }
 }
+
+export async function firebaseAddSession(action){
+  await firebase.firestore().collection('sesi').add({
+    guru: action.guruPilihan,
+    kelas: action.kelasPilihan,
+    mapel: action.mapelPilihan,
+    murid: action.siswaPilihan,
+    nama_sesi: action.courseName,
+    tanggal_mulai: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  return OK;
+}
+
+export async function firebaseDeleteSession(id){
+    await firebase.firestore().collection('sesi').doc(id).delete();
+    return OK;
+}
+
+// function getCurrentDate(){
+//   const today = new Date();
+//   const dd = today.getDate();
+//   const mm = today.getMonth()+1; //As January is 0.
+//   const yyyy = today.getFullYear();
+//   return (dd + '/' + mm + '/' + yyyy);
+// }
