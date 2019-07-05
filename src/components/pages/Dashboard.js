@@ -18,11 +18,12 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
-import {queryCourseList,handlePopup} from '../../store/Actions';
+import {queryCourseList,handlePopup,setSelectedCourseId} from '../../store/Actions';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
 import PopupWindow from './PopupWindow';
 import TambahSesiWindow from './TambahSesiWindow';
+import EditSesiWindow from './EditSesiWindow';
 
 
 const actionsStyles = theme => ({
@@ -135,6 +136,12 @@ class CustomPaginationActionsTable extends React.Component {
     this.setState({ page: 0, rowsPerPage: event.target.value });
   };
 
+  handleSelectCourse = (namaSesi,namaMurid,rowId,index) =>{
+    console.log('selected index = '+index)
+    this.props.setSelectedCourseId(index);
+    this.props.handlePopup(true,namaSesi, 'Mengajar','Laporan Kehadiran',namaMurid,rowId);
+  }
+
   render() {
     const { classes,isAdmin,email,rows } = this.props;
     const { rowsPerPage, page} = this.state;
@@ -144,16 +151,17 @@ class CustomPaginationActionsTable extends React.Component {
       let namaMurid = [];
       for(let row of rows){
         let namaMuridPerRow = [];
-        if(row.murid.length > 1){
-          namaMuridPerRow.push({key:0,content:'Jumlah Siswa: '+ row.murid.length + ' (Kelompok)'});
+        let listNama = row.murid.split(',');
+        if(listNama.length > 1){
+          namaMuridPerRow.push({key:0,content:'Jumlah Siswa: '+ listNama.length + ' (Kelompok)'});
           let counter=1;
-          for(let individu of row.murid){
+          for(let individu of listNama){
             namaMuridPerRow.push({key: counter, content: individu});
             counter++;
           }
         }else{
           namaMuridPerRow.push({key: 0, content:'Jumlah Siswa: 1 (Individu)'});
-          namaMuridPerRow.push({key: 1, content: row.murid[0]});
+          namaMuridPerRow.push({key: 1, content: listNama[0]});
         }
         namaMurid.push(namaMuridPerRow);
       }
@@ -178,9 +186,9 @@ class CustomPaginationActionsTable extends React.Component {
                 {
                   //sesi, guru, kelas, mapel, murid}
                   rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.key}>
                     <CustomTableCell component="th" scope="row" >
-                      <Button fullWidth onClick={() => this.props.handlePopup(true,row.nama_sesi, 'Mengajar','Laporan Kehadiran',namaMurid[row.key],row.id)}>
+                      <Button fullWidth onClick={() => this.handleSelectCourse(row.nama_sesi,namaMurid[row.key],row.id,row.key)}>
                         {row.nama_sesi}
                       </Button>
                     </CustomTableCell>
@@ -221,6 +229,7 @@ class CustomPaginationActionsTable extends React.Component {
           <RefreshIcon />
         </Fab>
         <PopupWindow/>
+        <EditSesiWindow/>
         </div>
       );
     }
@@ -267,7 +276,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({queryCourseList,handlePopup},dispatch);
+  return bindActionCreators({queryCourseList,handlePopup,setSelectedCourseId},dispatch);
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(Dashboard);

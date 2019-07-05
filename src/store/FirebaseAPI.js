@@ -1,5 +1,6 @@
 import firebase from '../FirebaseConfig';
-import circularJSON from 'circular-json';
+import * as Util from './Util';
+const JSON = require('circular-json');
 //status word
 
 const PHONE_NUMBER_AVAILABLE = 0x01;
@@ -11,8 +12,9 @@ const DATABASE_QUERY_FAILED = 'Database Query Failed';
 const DATABASE_WRITE_FAILED = 'Database Write Failed';
 const PHONE_NUMBER_ALREADY_TAKEN = 'Nomor telepon sudah dipakai pengguna lain';
 
-let counter=0;
+let counter = 0;
 
+const db = firebase.firestore();
 //=================================Firebase Functions==================================================
 
 //==================================SignIn/Out ===================================
@@ -36,34 +38,52 @@ export async function firebaseSignOut(){
 
 //================================== Dashboard Query ===================================
 export async function firebaseQueryDashboard(isAdmin,emailSearch){
-    let querySnapshot;
-    if(isAdmin){
-      querySnapshot = await firebase.firestore().collection('sesi').get();
-    }else{
-      querySnapshot =  await firebase.firestore().collection('sesi').where('email','==',emailSearch).get();
-    }
+    let querySnapshot = null;
     let dataList=[];
     let counter = 0;
+    if(isAdmin){
+      querySnapshot = await db.collection('sesi').get();
+    }else{
+      querySnapshot =  await db.collection('sesi').where('email','==',emailSearch).get();
+    }
     querySnapshot.forEach(function(snapshot){
       let snapshotData = snapshot.data();
       snapshotData['id'] = snapshot.id;
       snapshotData['key'] = counter++;
-      let mapels = snapshotData['mapel'];
-      let mapelList='';
-      for(let mapel of mapels){
-        mapelList += (mapel + '-');
-      }
-      mapelList = mapelList.trim();
-      snapshotData['mapel'] = mapelList.substring(0,mapelList.length-1);
       dataList.push(snapshotData);
     });
+    for(let snapshotData of dataList){
+      var temp = null;
+      temp = await getDataFromReference(snapshotData.guru);
+      snapshotData['guru'] = temp.username;
+      temp = await getDataFromReference(snapshotData.kelas);
+      snapshotData['kelas'] = temp.value;
+      temp = [];
+      for(const murid of snapshotData.murid){
+        let muridData = await getDataFromReference(murid);
+        temp.push(muridData);
+      }
+      snapshotData['murid'] = Util.arrayToString(temp,Util.SISWA);
+
+      temp = [];
+      for(const mapel of snapshotData.mapel){
+        let mapelData = await getDataFromReference(mapel);
+        temp.push(mapelData);
+      }
+      snapshotData['mapel'] = Util.arrayToString(temp,Util.MAPEL);
+    }
     dataList.sort((a, b) => (a.key < b.key ? -1 : 1));
-    console.log('list data dashboard = '+JSON.stringify(dataList));
     return dataList;
 }
 
+async function getDataFromReference(ref){
+  let snapshot = null;
+  snapshot = await ref.get();
+  return snapshot.data();
+}
+
 export async function firebaseQueryCollection(collectionName){
-  const querySnapshot = await firebase.firestore().collection(collectionName).get();
+  const querySnapshot = await db.collection(collectionName).get();
   let dataList=[];
   querySnapshot.forEach(function(snapshot){
     let snapshotData = snapshot.data();
@@ -71,7 +91,6 @@ export async function firebaseQueryCollection(collectionName){
     dataList.push(snapshotData);
   });
   dataList.sort((a, b) => (a.key < b.key ? -1 : 1));
-  console.log('list datanya = '+JSON.stringify(dataList));
   return dataList;
 }
 
@@ -79,7 +98,7 @@ export async function firebaseQueryCollection(collectionName){
 export async function firebaseCheckPhoneExist(phoneVal){
   //check apakah sudah ada user dg no.hp yang sama
   try{
-    const guruList = await firebase.firestore().collection('guru').get();
+    const guruList = await db.collection('guru').get();
     if(guruList){
         await guruList.forEach(function(guru){
             const dataGuru = guru.data();
@@ -116,7 +135,7 @@ export async function firebaseRegistration(action){
 async function processUserInfo(action){
   try{
     console.log('masuk process user info saga');
-    await firebase.firestore().collection('guru').doc(action.mailVal).set({
+    await db.collection('guru').doc(action.mailVal).set({
       username: action.nameVal,
       no_hp: action.phoneVal,
       alamat: action.addrVal,
@@ -129,19 +148,42 @@ async function processUserInfo(action){
 }
 
 export async function firebaseAddSession(action){
-  await firebase.firestore().collection('sesi').add({
-    guru: action.guruPilihan,
-    kelas: action.kelasPilihan,
-    mapel: action.mapelPilihan,
-    murid: action.siswaPilihan,
+  let mapelRefs = [];
+  let siswaRefs = [];
+  var ref=null;
+  for(let mapel of action.mapelPilihan){
+    ref = db.doc('master_mapel/' + mapel.id);
+    mapelRefs.push(ref);
+  }
+  for(let siswa of action.siswaPilihan){
+    ref = db.doc('murid/' + siswa.id);
+    siswaRefs.push(ref);
+  }
+
+  ref = await db.collection('detail_sesi').add({
+    pertemuan:'registered'
+  }); //reference untuk detil sesi
+  await db.collection('sesi').add({
+    guru: db.doc('guru/' + action.guruPilihan),
+    kelas: db.doc('master_kelas/' + action.kelasPilihan),
+    mapel: mapelRefs,
+    murid: siswaRefs,
     nama_sesi: action.courseName,
-    tanggal_mulai: firebase.firestore.FieldValue.serverTimestamp()
+    tanggal_mulai: firebase.firestore.FieldValue.serverTimestamp(),
+    detail_sesi: ref
   });
+  
   return OK;
 }
 
+export async function firebaseQueryCourseDetail(docRef){
+  console.log('docref = '+JSON.stringify(docRef));
+  let data = await getDataFromReference(docRef);
+  return data;
+}
+
 export async function firebaseDeleteSession(id){
-    await firebase.firestore().collection('sesi').doc(id).delete();
+    await db.collection('sesi').doc(id).delete();
     return OK;
 }
 

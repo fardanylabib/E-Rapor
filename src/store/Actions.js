@@ -79,6 +79,19 @@ export function tambahSesi(courseName,guruPilihan,siswaPilihan,kelasPilihan,mape
     }
 }
 
+export function simpanSesi(courseBundle){
+    return{
+        type: 'SAVE_SESSION',
+        courseBundle
+    }
+}
+
+export function closeEditor(){
+    return{
+        type: 'CLOSE_EDITOR'
+    }
+}
+
 export function handlePopup(popupOpen,popupTitle,popupOptions1,popupOptions2,popupContent,docId){
     return{
         type:'POPUP',
@@ -112,5 +125,21 @@ export function handleOptions2(popupOptions2){
     return{
         type:'BUTTON_2',
         popupOptions2,
+    }
+}
+
+export function queryCourseDetail(docRef){
+    console.log('query by id: '+docRef)
+    return{
+        type:'COURSE_DETAIL',
+        docRef
+    }
+}
+
+export function setSelectedCourseId(courseId){
+    console.log('COURSE id: '+courseId)
+    return{
+        type:'COURSE_ID',
+        courseId
     }
 }

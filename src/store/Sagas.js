@@ -89,6 +89,17 @@ function* queryCourses(action){
   }
 }
 
+function* queryCourseDtl(action){
+  try{
+    //query dashboard data after sign in
+    let tempData = yield call(FirebaseAPI.firebaseQueryCourseDetail,action.docRef);
+    yield put({type:'COURSE', courseBundle:tempData});
+  }catch(error){
+    let errorMessage = 'Single Course Query Failed: ' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
 function* queryGuru(){
   try{
     //query dashboard data after sign in
@@ -149,7 +160,6 @@ function* addSession(action){
 }
 
 function* options1Execute(action){
-  console.log('masuk hapus sesi saga '+ action.popupOptions1);
   try{    
     switch(action.popupOptions1){
       case 'Hapus':
@@ -165,7 +175,10 @@ function* options1Execute(action){
         } 
         break;
       case 'Mengajar':
-      // case 'Laporan Kehadiran':
+          console.log('masuk mengajar saga id: '+action.docId);
+          yield put({type:'OPEN_EDITOR'});
+          // const status = yield call(FirebaseAPI.firebaseDeleteSession,action.docId);
+          
       break;
     }
   }catch(error){
@@ -188,11 +201,12 @@ function* options2Execute(action){
   }
 }
 
+function * saveSession(action){
+  console.log('masuk save session : '+JSON.stringify(action.courseBundle))
+}
 
 export default function* rootSaga() {
   yield all([
-    takeLatest('BUTTON_1', options1Execute),
-    takeLatest('BUTTON_2', options2Execute),
     takeLatest('SIGN_IN', signIn),
     takeLatest('SIGN_OUT', signOut),
     takeLatest('REGISTER', handleRegister),
@@ -202,5 +216,9 @@ export default function* rootSaga() {
     takeLatest('SUBJECTS', queryMapel),
     takeLatest('STUDENTS', querySiswa),
     takeLatest('NEW_SESSION', addSession),
+    takeLatest('BUTTON_1', options1Execute),
+    takeLatest('BUTTON_2', options2Execute),
+    takeLatest('COURSE_DETAIL',queryCourseDtl),
+    takeLatest('SAVE_SESSION',saveSession)
   ]);
 }

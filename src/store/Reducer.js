@@ -30,7 +30,12 @@ const initialState = {
     selectedClass:'',
     selectedGuru:'',
     selectedMapel:[],
-    selectedMurid:[]
+    selectedMurid:[],
+
+    //data-data course
+    openEditor:false,
+    selectedCourse:null,
+    courseBundle:[],
 }
 
 function reducer(state = initialState, action){
@@ -126,6 +131,27 @@ function reducer(state = initialState, action){
                 ...state,
                 popupOpen: false,
             }
+        case 'OPEN_EDITOR':
+            return{
+                ...state,
+                openEditor: true,
+            }
+        case 'CLOSE_EDITOR':
+            return{
+                ...state,
+                openEditor: false,
+                courseBundle: action.courseBundle
+            }
+        case 'COURSE':
+            return{
+                ...state,
+                courseBundle: action.courseBundle
+            }
+        case 'COURSE_ID':
+            return{
+                ...state,
+                selectedCourse: action.courseId
+            } 
         default:
           return state;
     }

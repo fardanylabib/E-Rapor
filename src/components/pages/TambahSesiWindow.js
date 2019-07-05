@@ -26,6 +26,7 @@ import {bindActionCreators} from 'redux';
 import AddIcon from '@material-ui/icons/Add';
 import {queryGuru,queryKelas,queryMapel,querySiswa,tambahSesi} from '../../store/Actions';
 import Fab from '@material-ui/core/Fab';
+import * as Util from '../../store/Util';
 
 const styles = theme => ({
   appBar: {
@@ -85,9 +86,13 @@ class TambahSesi extends React.Component {
         open: false,
         openListGuru:false,
         openListKelas: false,
+        openListSiswa: false,
+        openListMapel: false,
         courseName:'',
         guruPilihan:'',
         kelasPilihan:'',
+        siswaPilihanStr:'',
+        mapelPilihanStr:'',
         siswaPilihan:[],
         mapelPilihan:[], 
       }
@@ -121,18 +126,14 @@ class TambahSesi extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  handleChangePilihSiswa = event => {
-    this.setState({ siswaPilihan: event.target.value });
-  };
-
-  handleChangePilihMapel = event => {
-    this.setState({ mapelPilihan: event.target.value });
-  };
-
   render() {
-    const { classes, guru, siswa, kelas, mapel} = this.props;
-    const {open, courseName, openListGuru, openListKelas,
-            guruPilihan, siswaPilihan,mapelPilihan,kelasPilihan,} = this.state;
+    const { classes, guru, siswa, kelas, mapel} 
+          = this.props;
+    const {open, courseName, guruPilihan, 
+          siswaPilihan,mapelPilihan,kelasPilihan} 
+          = this.state;
+
+    console.log('Guru Pilihan : '+JSON.stringify(this.state.guruPilihan));
     console.log('Siswa Pilihan : '+JSON.stringify(this.state.siswaPilihan));
     console.log('Mapel Pilihan : '+JSON.stringify(this.state.mapelPilihan));
     return (
@@ -164,9 +165,6 @@ class TambahSesi extends React.Component {
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="drop-down-list-1">Pilih Guru</InputLabel>
               <Select
-                open={openListGuru}
-                onClose={() => this.setState({openListGuru:false})}
-                onOpen={() => this.setState({openListGuru:true})}
                 onChange={this.handleChange}
                 value={guruPilihan}
                 inputProps={{
@@ -177,7 +175,7 @@ class TambahSesi extends React.Component {
                 <MenuItem value=""/>
                 {
                     guru.map(data => 
-                        <MenuItem key={data.key} value={data.username}>{data.username}</MenuItem>
+                        <MenuItem key={data.key} value={data.id}>{data.username}</MenuItem>
                     )
                 }
               </Select>
@@ -185,9 +183,6 @@ class TambahSesi extends React.Component {
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="drop-down-list-3">Pilih Kelas</InputLabel>
               <Select
-                open={openListKelas}
-                onClose={() => this.setState({openListKelas:false})}
-                onOpen={() => this.setState({openListKelas:true})}
                 onChange={this.handleChange}
                 value={kelasPilihan}
                 inputProps={{
@@ -198,91 +193,57 @@ class TambahSesi extends React.Component {
                 <MenuItem value=""/>
                 {
                     kelas.map(data => 
-                        <MenuItem key={data.key} value={data.value}>{data.value}</MenuItem>
+                        <MenuItem key={data.key} value={data.id}>{data.value}</MenuItem>
                     )
                 }
               </Select>
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="select-multiple-checkbox">Pilih Siswa</InputLabel>
+              <InputLabel htmlFor='select-multiple-checkbox'>Pilih Siswa</InputLabel>
               <Select
                 multiple
                 value={siswaPilihan}
-                onChange={this.handleChangePilihSiswa}
-                input={<Input id="select-multiple-checkbox" />}
-                renderValue={selected => selected.join(', ')}
-                MenuProps={MenuProps}
-              >
-                {siswa.map(data => (
-                  <MenuItem key={data.key} value={data.username}>
-                    <Checkbox checked={siswaPilihan.indexOf(data.username) > -1} />
-                    <ListItemText primary={data.username} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-{/*             
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="drop-down-list-2">Pilih Siswa</InputLabel>
-              <Select
-                open={openListSiswa}
-                onClose={() => this.setState({openListSiswa:false})}
-                onOpen={() => this.setState({openListSiswa:true})}
                 onChange={this.handleChange}
-                value={siswaPilihan}
                 inputProps={{
                   name: 'siswaPilihan',
-                  id: 'drop-down-list-2',
+                  id: 'select-multiple-checkbox',
                 }}
+                renderValue={()=> Util.arrayToString(siswaPilihan,Util.SISWA)}
+                MenuProps={MenuProps}
               >
-                <MenuItem value=""/>
                 {
-                    siswa.map(data => 
-                        <MenuItem key={data.key} value={data.username}>{data.username}</MenuItem>
-                    )
+                  siswa.map(data => (
+                    <MenuItem key={data.key} value={data}>
+                      <Checkbox checked={siswaPilihan.indexOf(data) >= 0} />
+                      <ListItemText primary={data.username} />
+                    </MenuItem>
+                  ))
                 }
               </Select>
-            </FormControl> */}
+            </FormControl>
+
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="select-multiple-checkbox-1">Pilih Pelajaran</InputLabel>
               <Select
                 multiple
                 value={mapelPilihan}
-                onChange={this.handleChangePilihMapel}
-                input={<Input id="select-multiple-checkbox-1" />}
-                renderValue={selected => selected.join(', ')}
+                onChange={this.handleChange}
+                inputProps={{
+                  name: 'mapelPilihan',
+                  id: 'select-multiple-checkbox-1',
+                }}
+                renderValue={()=> Util.arrayToString(mapelPilihan,Util.MAPEL)}
                 MenuProps={MenuProps}
               >
                 {mapel.map(data => (
-                  <MenuItem key={data.key} value={data.value}>
-                    <Checkbox checked={mapelPilihan.indexOf(data.value) > -1} />
+                  <MenuItem key={data.key} value={data}>
+                    <Checkbox checked={mapelPilihan.indexOf(data) >= 0} />
                     <ListItemText primary={data.value} />
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="drop-down-list-4">Pilih Pelajaran</InputLabel>                
-              <Select
-                open={openListMapel}
-                onClose={() => this.setState({openListMapel:false})}
-                onOpen={() => this.setState({openListMapel:true})}
-                onChange={this.handleChange}
-                value={mapelPilihan}
-                inputProps={{
-                  name: 'mapelPilihan',
-                  id: 'drop-down-list-4',
-                }}
-              >
-                <MenuItem value=""/>
-                {
-                    mapel.map(data => 
-                        <MenuItem key={data.key} value={data.value}>{data.value}</MenuItem>
-                    )
-                }
-              </Select>
-            </FormControl> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} className={classes.cancelbutton} size='large' >
