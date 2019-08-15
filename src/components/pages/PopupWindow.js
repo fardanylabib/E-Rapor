@@ -59,7 +59,7 @@ class PopupWindow extends React.Component {
               {this.props.title}
               {
                 this.state.showDeleteBtn?       
-                <IconButton  onClick={() => this.props.handlePopup(true,'Anda yakin akan menghapus '+this.props.title+' ?','Hapus',null,null,this.props.docId)}  style={style.button}>
+                <IconButton  onClick={() => this.props.handlePopup(true,'Anda yakin akan menghapus '+this.props.title+' ?','Hapus',null,null,this.props.doc)}  style={style.button}>
                   <DeleteIcon />
                 </IconButton>
                 :
@@ -76,7 +76,7 @@ class PopupWindow extends React.Component {
             <DialogActions>
               {
                 this.props.options1?
-                <Button variant="contained"  style={style.options1} onClick = {() => this.props.handleOptions1(this.props.options1,this.props.docId,this.props.email,this.props.isAdmin)}>
+                <Button variant="contained"  style={style.options1} onClick = {() => this.props.handleOptions1(this.props.options1,this.props.doc,this.props.email,this.props.isAdmin)}>
                   {this.props.options1}
                 </Button>
                 :
@@ -109,7 +109,7 @@ const mapStateToProps = (state) => {
     options1: state.popupOptions1,
     options2: state.popupOptions2,
     content: state.popupContent,
-    docId: state.docId,
+    doc: state.doc,
     isAdmin: state.isAdmin,
     email: state.email
   }

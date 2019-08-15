@@ -161,7 +161,7 @@ export async function firebaseAddSession(action){
   }
 
   ref = await db.collection('detail_sesi').add({
-    pertemuan:'registered'
+    pertemuan:[]
   }); //reference untuk detil sesi
   await db.collection('sesi').add({
     guru: db.doc('guru/' + action.guruPilihan),
@@ -185,6 +185,18 @@ export async function firebaseQueryCourseDetail(docRef){
 export async function firebaseDeleteSession(id){
     await db.collection('sesi').doc(id).delete();
     return OK;
+}
+
+export async function firebaseSaveSession(dataPertemuan,sessionDetailRef){
+  try{
+    console.log('masuk process save course bundle');
+    await sessionDetailRef.set({
+      pertemuan: dataPertemuan
+    });
+    return OK;
+  }catch(error){
+    throw new Error(DATABASE_WRITE_FAILED);
+  }
 }
 
 // function getCurrentDate(){

@@ -1,5 +1,6 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
 import * as FirebaseAPI from './FirebaseAPI';
+const JSON = require('circular-json');
 
 const ADMIN_EMAIL = 'labibfardany@gmail.com';
 
@@ -20,6 +21,7 @@ function* signIn(action){
           admin = true;
         }
         yield put({type:'USER_LOGIN',login:true,isAdmin:admin,email:action.email}); 
+        yield put({type:'MESSAGE', variation:'success', content:'Sukses Masuk'});
       }else{
         yield put({type:'USER_LOGIN',login:false,isAdmin:false, email:''}); 
         yield put({type:'MESSAGE', variation:'warning', content:'Email belum diverifikasi, mohon verifikasi dengan klik link verifikasi di email yang anda daftarkan'});
@@ -90,14 +92,7 @@ function* queryCourses(action){
 }
 
 function* queryCourseDtl(action){
-  try{
-    //query dashboard data after sign in
-    let tempData = yield call(FirebaseAPI.firebaseQueryCourseDetail,action.docRef);
-    yield put({type:'COURSE', courseBundle:tempData});
-  }catch(error){
-    let errorMessage = 'Single Course Query Failed: ' + error.message;
-    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
-  }
+
 }
 
 function* queryGuru(){
@@ -160,11 +155,12 @@ function* addSession(action){
 }
 
 function* options1Execute(action){
+  console.log('masuk options 1');
   try{    
     switch(action.popupOptions1){
       case 'Hapus':
         console.log('masuk hapus sesi saga');
-        const status = yield call(FirebaseAPI.firebaseDeleteSession,action.docId);
+        const status = yield call(FirebaseAPI.firebaseDeleteSession,action.doc.id);
         if(status === OK){
           let tempRows = yield call(FirebaseAPI.firebaseQueryDashboard,action.isAdmin,action.email);
           yield put({type:'DASHBOARD_DATA', rows:tempRows});
@@ -175,10 +171,17 @@ function* options1Execute(action){
         } 
         break;
       case 'Mengajar':
-          console.log('masuk mengajar saga id: '+action.docId);
-          yield put({type:'OPEN_EDITOR'});
-          // const status = yield call(FirebaseAPI.firebaseDeleteSession,action.docId);
-          
+          // console.log('masuk mengajar saga '+JSON.stringify(action.doc.id));
+          try{
+            //query dashboard data after sign in
+            let tempData = yield call(FirebaseAPI.firebaseQueryCourseDetail,action.doc.detail_sesi);
+            yield put({type:'COURSE', courseBundle:tempData });
+            yield put({type:'OPEN_EDITOR'});
+          }catch(error){
+            let errorMessage = 'Single Course Query Failed: ' + error.message;
+            yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+          }
+
       break;
     }
   }catch(error){
@@ -202,7 +205,22 @@ function* options2Execute(action){
 }
 
 function * saveSession(action){
-  console.log('masuk save session : '+JSON.stringify(action.courseBundle))
+  console.log('masuk save session : '+JSON.stringify(action.dataPertemuan));
+  try{
+    const status = yield call(FirebaseAPI.firebaseSaveSession,action.dataPertemuan,action.detailSesiRef);
+    const tanggalPertemuan = action.dataPertemuan[action.dataPertemuan.length-1].date;
+    if(status === OK){
+      const tempData = yield call(FirebaseAPI.firebaseQueryCourseDetail,action.detailSesiRef);
+      yield put({type:'COURSE', courseBundle:tempData });
+      yield put({type: 'MESSAGE', variation: 'success', content:'sesi tanggal '+tanggalPertemuan+' berhasil ditambah'});
+      yield put({type:'NEXT_STEP'});
+    }else{
+      yield put({type: 'MESSAGE', variation: 'error', content:'sesi tangal '+tanggalPertemuan+' gagal ditambah'});
+    }
+  }catch(error){
+    let errorMessage = 'Terjadi Kesalahan: ' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
 }
 
 export default function* rootSaga() {

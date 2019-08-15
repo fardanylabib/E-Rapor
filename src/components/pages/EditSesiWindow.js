@@ -9,20 +9,29 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {simpanSesi,closeEditor,queryCourseDetail,openMessage} from '../../store/Actions';
+import {simpanSesi,closeEditor,queryCourseDetail,openMessage,nextStep,prevStep} from '../../store/Actions';
 import InfiniteCalendar from 'react-infinite-calendar';
 import MasonryLayout from 'react-masonry-layout'
 
+import BottomNavigation from '@material-ui/core/BottomNavigation';
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
+
 import 'react-infinite-calendar/styles.css';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+
+import SaveIcon from '@material-ui/icons/Save';
+import CloseIcon from '@material-ui/icons/Close';
+import DateIcon from '@material-ui/icons/DateRange';
+import BackIcon from '@material-ui/icons/ArrowBack';
+import CheckIcon from '@material-ui/icons/Check';
+import SessionIcon from '@material-ui/icons/EventNote';
 
 const styles = theme => ({
   appBar: {
@@ -47,22 +56,28 @@ const styles = theme => ({
   buttongroup:{
     position: 'fixed',
     bottom: theme.spacing.unit,
-  }
+  },
+  mansonry:{
+    margin: theme.spacing.unit
+  },
+  nav: {
+    width: '100%',
+    bottom: '0px',
+    position:'fixed',
+    zIndex:100,
+  },
+  calendar:{
+    margin:'0 auto 0 auto'
+  },
+  // cardContent:{
+  //   :'10px'
+  // }
 });
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 
 let today = new Date().toString();
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 const titles = ['Pilih Tanggal Mengajar', 'Daftar Sesi', 'Detail Sesi'];
 
@@ -76,12 +91,12 @@ class EditSesi extends React.Component {
     super(props);
     // Set some state
     this.state = {
-      step : 0,
       courseDetail: [],
       perPage: 10,
       items: Array(20).fill(),
       selectedDate: today,
-      queried:false
+      localPertemuan:[],
+      navId:1,
     }
   }
 
@@ -91,6 +106,41 @@ class EditSesi extends React.Component {
     });
   }
 
+  handleChangeStatus = (event,tanggal) =>{
+      let pertemuanCopy = this.state.localPertemuan.slice();
+      console.log('pertemuan copy = '+JSON.stringify(pertemuanCopy));
+      console.log('pertemuan date = '+tanggal);
+      for(let i = 0;i<pertemuanCopy.length;i++){
+        if(pertemuanCopy[i].date === tanggal){
+          console.log('pertemuan date masuk = '+tanggal);
+          pertemuanCopy[i].status = event.target.value;
+          this.setState({localPertemuan: pertemuanCopy});
+          break;
+        }
+      }
+  }
+
+  handleAlasanCancel = (event,tanggal) => {
+    let pertemuanCopy = this.state.localPertemuan.slice();
+    for(let i = 0;i<pertemuanCopy.length;i++){
+      if(pertemuanCopy[i].date === tanggal){
+        pertemuanCopy[i].cancelling = event.target.value;
+        this.setState({localPertemuan: pertemuanCopy});
+        break;
+      }
+    }
+  }
+
+  handleKeterangan = (event,tanggal) => {
+    let pertemuanCopy = this.state.localPertemuan.slice();
+    for(let i = 0;i<pertemuanCopy.length;i++){
+      if(pertemuanCopy[i].date === tanggal){
+        pertemuanCopy[i].keterangan = event.target.value;
+        this.setState({localPertemuan: pertemuanCopy});
+        break;
+      }
+    }
+  }
 
   simpan = () => {
     /*
@@ -100,40 +150,45 @@ class EditSesi extends React.Component {
     - Alasan Cancel
     - Keterangan
     */
-    const {docId, courseList,courseBundle} = this.props;
-    const {queried, courseDetail,selectedDate} = this.state;
-    if(!queried){
-      this.props.queryCourseDetail(courseList[docId].detail_sesi);
-    }
-    if(courseBundle.courses){
-      for(let course of courseBundle.courses){
+    const {courseDoc} = this.props;
+    const {selectedDate,localPertemuan} = this.state;
+    let dataPertemuan = localPertemuan;
+    if(dataPertemuan[0]){
+      for(let course of dataPertemuan){
         if(course.date === selectedDate){
           this.props.openMessage('error','Sudah ada kelas di hari tersebut');
           return;
         }
       }
     }
-    let buff = [];
-    buff.push({
+    //jika course baru
+    dataPertemuan.push({
       'date'        : selectedDate,
-      'status'      : 0,
+      'status'      : '0',
       'cancelling'  : '',
       'keterangan'  : '',
     });
-    this.props.simpanSesi(buff);
+    this.props.simpanSesi(dataPertemuan,courseDoc.detail_sesi);
+  }
+
+  simpanSesi = (dataPertemuan,detailSesi) =>{
+    this.props.simpanSesi(dataPertemuan,detailSesi);
+    this.props.closeEditor();
   }
 
   render() {
-    const { step,selectedDate} = this.state;
-    const { classes, openEditor} = this.props;
+    const { selectedDate,localPertemuan,navId} = this.state;
+    const { classes, openEditor,docId,step,courseBundle,courseDoc} = this.props;
     console.log('open editor = '+openEditor);
     console.log('selected date = '+selectedDate);
-    console.log('course ID = '+this.props.docId);
-    console.log('course Bundle = '+JSON.stringify(this.props.courseBundle));
+    console.log('course ID = '+docId);
+    console.log('course Bundle = '+JSON.stringify(localPertemuan));
+
     return (
         <Dialog
           fullScreen
           open={openEditor}
+          onEnter = {()=>this.setState({localPertemuan : courseBundle.pertemuan})}
           onClose={this.props.closeEditor}
           TransitionComponent={TransitionUp}
         >
@@ -150,100 +205,90 @@ class EditSesi extends React.Component {
           <br/>
           {
             step == 0 ?
-            <Grid container alignContent='center' alignItems='center' justify='center'>
-                <InfiniteCalendar
+            <div>
+               <InfiniteCalendar
                   width={(window.innerWidth <= 650) ? window.innerWidth : 650}
                   height={window.innerHeight - 330}
                   selected={today}
                   onSelect={(date)=>this.setState({selectedDate:date.toString()})}
+                  className = {classes.calendar}
                 />
-              <br/>
-              <Paper className={classes.buttongroup}>
-                <Button onClick={this.props.closeEditor} className={classes.cancelbutton} size='large' >
-                  Kembali
-                </Button>    
-                <Button 
-                  onClick={this.simpan}
-                  className={classes.okbutton} 
-                  variant='contained' 
-                  size='large'>
-                  Pilih
-                </Button>
-                <Button 
-                  onClick={() => this.setState({step: step+1})}
-                  className={classes.cancelbutton} 
-                  size='large'>
-                  Daftar Sesi<ChevronRightIcon/>
-                </Button>
-              </Paper>
-            </Grid>
+
+              <BottomNavigation
+                value={navId}
+                onChange={(event, newValue) => {
+                  this.setState({navId:newValue});
+                }}
+                showLabels
+                className={classes.nav}
+              >
+                <BottomNavigationAction onClick={this.props.closeEditor} label='Kembali' icon={<BackIcon />} />
+                <BottomNavigationAction onClick={this.simpan} label='Pilih' icon={<CheckIcon />} />
+                <BottomNavigationAction onClick={this.props.nextStep} label='Daftar Sesi' icon={<SessionIcon/>} />
+              </BottomNavigation>
+            </div>
             : 
             step == 1 ?
-            <Grid container alignContent='center' alignItems='center' justify='center'>
+            <div>
               <MasonryLayout
                 id="masonry-layout"
-                infiniteScroll={this.loadItems}>
-      
-                {this.state.items.map((v, i) => {
-                  let height = i % 2 === 0 ? 200 : 100;
+                infiniteScroll={this.loadItems}
+                >
+                {
+                  localPertemuan.map((pertemuan) => {
                   return (
                     <div
-                      key={i}
-                      style={{
-                        width: '100px',
-                        height: `${height}px`,
-                        lineHeight: `${height}px`,
-                        color: 'white',
-                        fontSize: '32px',
-                        display: 'block',
-                        background: 'rgba(0,0,0,0.7)'
-                      }}>
-                      {i}
+                      key={pertemuan.date}
+                      style={{width: '200px',color: 'black',
+                              display: 'block',background: '#EEEEEE',margin: '10px', padding:'10px'
+                            }}>
+                        <Typography variant='h6'align='center'>
+                          {pertemuan.date.substring(0,15)}
+                        </Typography>
+                        <div >
+                          <RadioGroup
+                            aria-label='Status'
+                            value={pertemuan.status}
+                            onChange={(event)=>this.handleChangeStatus(event,pertemuan.date)}
+                          >
+                            <FormControlLabel value={'0'} control={<Radio color='default'/>} label="Pending" />
+                            <FormControlLabel value={'1'} control={<Radio color='primary'/>} label="Completed" />
+                            <FormControlLabel value={'-1'} control={<Radio color='secondary'/>} label="Cancelled" />
+                          </RadioGroup>       
+                          {
+                            pertemuan.status == '-1'?
+                            <div>
+                              <Typography>
+                                Alasan Cancel:
+                              </Typography>
+                              <textarea rows={3} value={pertemuan.cancelling} onChange={(event) =>this.handleAlasanCancel(event,pertemuan.date)}/>
+                            </div>
+                            :null
+                          }   
+                          <Typography>
+                            Keterangan:
+                          </Typography>
+                          <textarea rows={3} value={pertemuan.keterangan} onChange={(event) =>this.handleKeterangan(event,pertemuan.date)}/>
+                        </div>
                     </div>
                   )}
                 )}
       
               </MasonryLayout>
-              <Paper className={classes.buttongroup}>
-                <Button onClick={() => this.setState({step: step-1})} className={classes.cancelbutton} size='large' >
-                  <ChevronLeftIcon/>Pilih Tanggal
-                </Button>    
-                <Button 
-                  onClick={() => this.props.simpanSesi(this.state.courseDetail)}
-                  className={classes.okbutton} 
-                  variant='contained' 
-                  size='large'>
-                  Pilih
-                </Button>
-                <Button 
-                  onClick={() => this.setState({step: step+1})}
-                  className={classes.cancelbutton} 
-                  size='large'>
-                  Detail Sesi<ChevronRightIcon/>
-                </Button>
-              </Paper>
-            </Grid>
-            :
-            <Grid container container alignContent='center' alignItems='center' justify='center'>
-              <Paper className={classes.buttongroup}>
-                <Button onClick={() => this.setState({step: step-1})} className={classes.cancelbutton} size='large' >
-                  <ChevronLeftIcon/>Daftar Sesi
-                </Button>    
-                <Button 
-                  onClick={() => this.props.simpanSesi(this.state.courseDetail)}
-                  className={classes.okbutton} 
-                  variant='contained' 
-                  size='large'>
-                  Simpan Perubahan
-                </Button>
-                <Button 
-                  onClick={this.props.closeEditor}
-                  className={classes.cancelbutton} 
-                  size='large'>
-                  Tutup
-                </Button>
-              </Paper>
-            </Grid>
+              <BottomNavigation
+                value={navId}
+                onChange={(event, newValue) => {
+                  this.setState({navId:newValue});
+                }}
+                showLabels
+                className={classes.nav}
+              >
+                <BottomNavigationAction onClick={this.props.prevStep} label='Pilih Tanggal' icon={<DateIcon />} />
+                <BottomNavigationAction onClick={() => this.simpanSesi(localPertemuan,courseDoc.detail_sesi)} label='Simpan Perubahan' icon={<SaveIcon />} />
+                <BottomNavigationAction onClick={this.props.closeEditor} label='Tutup' icon={<CloseIcon/>} />
+              </BottomNavigation>
+            </div>
+            :null
           } 
         </Dialog>
     );
@@ -257,15 +302,17 @@ const EditSesiWindow = withStyles(styles)(EditSesi);
 // //==================================redux======================================
 const mapStateToProps = (state) => {
   return {
-    courseList: state.rows,
+    courseDoc: state.doc,
     openEditor: state.openEditor,
     docId: state.selectedCourse,
-    courseBundle: state.courseBundle
+    courseBundle: state.courseBundle,
+    queried: state.courseDtlQueried,
+    step: state.sessionStep
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({simpanSesi,closeEditor,queryCourseDetail,openMessage},dispatch);
+  return bindActionCreators({simpanSesi,closeEditor,queryCourseDetail,openMessage,nextStep,prevStep},dispatch);
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(EditSesiWindow);

@@ -1,9 +1,13 @@
+
+ import * as Util from './Util';
+
 const initialState = {
     //user auth state
     isUser:false,
     isAdmin:false,
     email:'',
     notRegistering:false,
+    loading:Util.STATUS_IDLE,
 
     //messages
     messageOpen: false,
@@ -16,7 +20,7 @@ const initialState = {
     popupOptions1:'',
     popupOptions2:'',
     popupContent:'',
-    docId:'',
+    doc:{},
 
     //dashboard states
     rows: [],
@@ -31,19 +35,25 @@ const initialState = {
     selectedGuru:'',
     selectedMapel:[],
     selectedMurid:[],
+    sessionStep:0,
 
     //data-data course
     openEditor:false,
     selectedCourse:null,
     courseBundle:[],
+    courseDtlQueried:false
 }
 
 function reducer(state = initialState, action){
     switch (action.type){
         case 'SIGN_IN':
         case 'SIGN_OUT':
-        case 'REGISTER':   
-            return state;
+        case 'REGISTER':
+        case 'COURSES':   
+            return {
+                ...state,
+                loading:Util.STATUS_LOADING
+            }
             // return {
             //     ...state,
             //     loading: true
@@ -68,7 +78,8 @@ function reducer(state = initialState, action){
                 ...state,
                 messageOpen: true,
                 messageVariation : action.variation,
-                messageContent : action.content
+                messageContent : action.content,
+                loading:Util.STATUS_LOADING_DONE
             }
         case 'CLOSE_MSG':
             console.log('close message');
@@ -81,6 +92,7 @@ function reducer(state = initialState, action){
             return{
                 ...state,
                 rows: action.rows,
+                loading:Util.STATUS_LOADING_DONE
             }
         case 'GURU_DATA':
             console.log('teacher query done');
@@ -117,6 +129,7 @@ function reducer(state = initialState, action){
                 notRegistering: action.notRegistering,
             }
         case 'POPUP':
+            console.log('doc id popup = '+action.doc.id)
             return{
                 ...state,
                 popupOpen: action.popupOpen,
@@ -124,7 +137,7 @@ function reducer(state = initialState, action){
                 popupOptions1: action.popupOptions1,
                 popupOptions2: action.popupOptions2,
                 popupContent: action.popupContent,
-                docId: action.docId
+                doc: action.doc
             }
         case 'POPUP_CANCEL':
             return{
@@ -135,23 +148,38 @@ function reducer(state = initialState, action){
             return{
                 ...state,
                 openEditor: true,
+                courseDtlQueried: false,
+                sessionStep:0
             }
         case 'CLOSE_EDITOR':
             return{
                 ...state,
                 openEditor: false,
-                courseBundle: action.courseBundle
             }
         case 'COURSE':
+            console.log('Course Bundlenya : '+JSON.stringify(action.courseBundle))
             return{
                 ...state,
-                courseBundle: action.courseBundle
+                courseBundle: action.courseBundle,
+                courseDtlQueried: true,
             }
         case 'COURSE_ID':
             return{
                 ...state,
                 selectedCourse: action.courseId
             } 
+        case 'NEXT_STEP':
+            {
+                const newState = {...state};
+                newState.sessionStep += 1;
+                return newState;
+            }
+        case 'PREV_STEP':
+            {
+                const newState = {...state};
+                newState.sessionStep -= 1;
+                return newState; 
+            }          
         default:
           return state;
     }

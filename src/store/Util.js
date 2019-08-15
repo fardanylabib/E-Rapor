@@ -4,6 +4,9 @@ export const MAPEL = 2;
 export const KELAS = 3;
 export const COURSE = 4;
 export const SIMPLE = 5;
+export const STATUS_LOADING = -1;
+export const STATUS_IDLE = 0;
+export const STATUS_LOADING_DONE = 1;
 
 
 export function arrayToString(arr,type) {

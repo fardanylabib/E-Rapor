@@ -88,10 +88,6 @@ class LogIn extends React.Component {
               <Button onClick={() => this.props.handleSignIn(tempEmail,tempPass)} style={style.login} variant="contained">
                 Log In
               </Button>
-              {/* <Button onClick={signInWithGoogle} style={style.login} variant="contained">
-                Masuk Dengan &nbsp;&nbsp;
-                <img src={GoogleLogo} style={style.googleLogo} alt="HTML5 Icon"/>
-              </Button> */}
             </DialogActions>
             
           </Dialog>
