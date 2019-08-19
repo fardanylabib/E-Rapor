@@ -240,7 +240,7 @@ class EditSesi extends React.Component {
                     <div
                       key={pertemuan.date}
                       style={{width: '200px',color: 'black',
-                              display: 'block',background: '#EEEEEE',margin: '10px', padding:'10px'
+                              display: 'block',background: '#E7EAED',margin: '10px', padding:'10px'
                             }}>
                         <Typography variant='h6'align='center'>
                           {pertemuan.date.substring(0,15)}
