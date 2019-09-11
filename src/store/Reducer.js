@@ -179,7 +179,13 @@ function reducer(state = initialState, action){
                 const newState = {...state};
                 newState.sessionStep -= 1;
                 return newState; 
-            }          
+            }
+        case 'BUTTON_2':
+            return{
+                ...state,
+                popupOptions2: action.popupOptions2,
+                popupTitle: action.optionTitle
+            }        
         default:
           return state;
     }

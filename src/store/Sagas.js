@@ -17,9 +17,9 @@ function* signIn(action){
       const cridential = yield call(FirebaseAPI.firebaseSignIn,action.email,action.passw);
       let admin = false;
       if(cridential.user.emailVerified){
-        if(action.email === ADMIN_EMAIL){
+        // if(action.email === ADMIN_EMAIL){ //sementara bypass sbg admin
           admin = true;
-        }
+        // }
         yield put({type:'USER_LOGIN',login:true,isAdmin:admin,email:action.email}); 
         yield put({type:'MESSAGE', variation:'success', content:'Sukses Masuk'});
       }else{
@@ -190,19 +190,19 @@ function* options1Execute(action){
   }
 }
 
-function* options2Execute(action){
-  console.log('masuk options2 saga 0');
-  try{
-    const status = NOK;
-    switch(action.options){
-      case 'Laporan Kehadiran':
-      break;
-    }
-  }catch(error){
-    let errorMessage = 'Terjadi Kesalahan: ' + error.message;
-    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
-  }
-}
+// function* options2Execute(action){
+//   console.log('masuk options2 saga 0');
+//   try{
+//     const status = NOK;
+//     switch(action.popupOptions2){
+//       case 'Laporan Kehadiran':
+//       break;
+//     }
+//   }catch(error){
+//     let errorMessage = 'Terjadi Kesalahan: ' + error.message;
+//     yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+//   }
+// }
 
 function * saveSession(action){
   console.log('masuk save session : '+JSON.stringify(action.dataPertemuan));
@@ -235,7 +235,7 @@ export default function* rootSaga() {
     takeLatest('STUDENTS', querySiswa),
     takeLatest('NEW_SESSION', addSession),
     takeLatest('BUTTON_1', options1Execute),
-    takeLatest('BUTTON_2', options2Execute),
+    // takeLatest('BUTTON_2', options2Execute),
     takeLatest('COURSE_DETAIL',queryCourseDtl),
     takeLatest('SAVE_SESSION',saveSession)
   ]);

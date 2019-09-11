@@ -1,4 +1,5 @@
 
+import React from 'react';
 import {ExcelFile,ExcelSheet} from 'react-data-export';
 
 export const SISWA = 0;
@@ -10,7 +11,6 @@ export const SIMPLE = 5;
 export const STATUS_LOADING = -1;
 export const STATUS_IDLE = 0;
 export const STATUS_LOADING_DONE = 1;
-
 
 export function arrayToString(arr,type) {
     console.log('masuk array to string');
@@ -62,7 +62,6 @@ export function createReport({JSONArray}){
                     data: [ [],[] ]
                 }
             ]
-
         },
         {
             sheetName: 'sheet2',

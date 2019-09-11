@@ -10,6 +10,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {handlePopup,handlePopupCancel,handleOptions1,handleOptions2} from '../../store/Actions';
+import { withRouter, Link } from 'react-router-dom';
 
 const style = {
     button: {
@@ -84,7 +85,9 @@ class PopupWindow extends React.Component {
               }
               {
                 this.props.options2?
-                <Button variant="contained" style={style.options2} onClick = {() => this.props.handleOptions2(this.props.options2)}>
+                <Button component={Link} variant="contained" style={style.options2} to='/report'
+                  onClick = {()=>this.props.handleOptions2(this.props.options2, this.props.title)}
+                >
                   {this.props.options2}
                 </Button>
                 :
@@ -120,4 +123,4 @@ const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({handlePopup,handlePopupCancel,handleOptions1,handleOptions2},dispatch);
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(PopupWindow);
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(PopupWindow));

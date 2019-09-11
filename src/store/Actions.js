@@ -121,11 +121,11 @@ export function handleOptions1(popupOptions1,doc,email,isAdmin){
     }
 }
 
-export function handleOptions2(popupOptions2){
-    console.log('masuk options 2 action')
+export function handleOptions2(popupOptions2,optionTitle){
     return{
         type:'BUTTON_2',
         popupOptions2,
+        optionTitle,
     }
 }
 

@@ -32,6 +32,7 @@ import DaftarGuru from './pages/DaftarGuru';
 import DaftarKelas from './pages/DaftarKelas';
 import DaftarPelajaran from './pages/DaftarPelajaran';
 import DaftarSiswa from './pages/DaftarSiswa';
+import Report from './pages/Report';
 
 //images & icons
 import AlmasLogo from '../media/logo-almastutoring.png';
@@ -281,6 +282,7 @@ class PersistentDrawerLeft extends React.Component {
             <Route path ='/daftarsiswa' component={DaftarSiswa}/>
             <Route path ='/daftarkelas' component={DaftarKelas}/>
             <Route path ='/daftarpelajaran' component={DaftarPelajaran}/>
+            <Route path ='/report' component={Report}/>
           </Switch>
           
         </main>
@@ -305,11 +307,6 @@ const mapStateToProps = (state) => {
     kelas: state.kelas,
     mapel: state.mapel,
     rows: state.rows
-    // rowsQueried: state.rowsQueried,
-    // guruQueried: state.guruQueried,
-    // siswaQueried: state.siswaQueried,
-    // kelasQueried: state.kelasQueried,
-    // mapelQueried: state.mapelQueried,
   }
 }
 
