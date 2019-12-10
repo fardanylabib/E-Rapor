@@ -77,8 +77,8 @@ export async function firebaseQueryDashboard(isAdmin,emailSearch){
 }
 
 async function getDataFromReference(ref){
-  let snapshot = null;
-  snapshot = await ref.get();
+  const snapshot = await ref.get();
+  console.log('reference data = '+ JSON.stringify(snapshot));
   return snapshot.data();
 }
 

@@ -157,3 +157,10 @@ export function prevStep(){
         type: 'PREV_STEP',
     }
 }
+
+export function printAll(courses){
+    return{
+        type: 'PRINT_ALL',
+        courses,
+    }
+}

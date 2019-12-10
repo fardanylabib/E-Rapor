@@ -1,6 +1,6 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
 import * as FirebaseAPI from './FirebaseAPI';
-const JSON = require('circular-json');
+// const JSON = require('circular-json');
 
 const ADMIN_EMAIL = 'labibfardany@gmail.com';
 
@@ -17,9 +17,9 @@ function* signIn(action){
       const cridential = yield call(FirebaseAPI.firebaseSignIn,action.email,action.passw);
       let admin = false;
       if(cridential.user.emailVerified){
-        // if(action.email === ADMIN_EMAIL){ //sementara bypass sbg admin
+        if(action.email === ADMIN_EMAIL){ //sementara bypass sbg admin
           admin = true;
-        // }
+        }
         yield put({type:'USER_LOGIN',login:true,isAdmin:admin,email:action.email}); 
         yield put({type:'MESSAGE', variation:'success', content:'Sukses Masuk'});
       }else{
@@ -223,6 +223,105 @@ function * saveSession(action){
   }
 }
 
+function * printAll(action){
+  console.log('Masuk print All saga');
+  try{
+    let JSONArray= [];
+    for(const course of action.courses){
+      let sheet =
+      { 
+        'sheetName': course.nama_sesi,
+        'sheetData':
+        [
+          {
+            'columns': ['Guru','Kelas','Jenis Les Privat', 'Nama Siswa', 'Mata Pelajaran'],
+            'data' :   [[],[],[],[],[]]
+          },
+          {
+            'ysteps': 2,
+            'columns': ['Sesi',	'Tanggal',	'Status',	'Alasan Cancelling',	'Keterangan'],
+            'data' :   [[],[],[],[],[]]
+          }
+        ]
+      }
+      sheet.sheetData[0].data[0].push(course.guru);
+      sheet.sheetData[0].data[1].push(course.kelas);
+      const siswa = course.murid.split(',');
+      if(siswa.length > 1){
+        sheet.sheetData[0].data[2].push('Kelompok'); 
+      }else{
+        sheet.sheetData[0].data[2].push('Individu'); 
+      }
+      for(const individu of siswa){
+        sheet.sheetData[0].data[3].push(individu.trim());
+      }
+      const mapel = course.mapel.split(',');
+      for(const pelajaran of mapel){
+        sheet.sheetData[0].data[4].push(pelajaran.trim());
+      }
+       
+      const tempData = yield call(FirebaseAPI.firebaseQueryCourseDetail,course.detail_sesi);
+      console.log('Course detail = '+JSON.stringify(tempData));
+      
+      let index = 1;
+      for(const dataPertemuan of tempData) {
+        sheet.sheetData[1].data[0].push('Pertemuan ' + (index++));
+        sheet.sheetData[1].data[1].push(dataPertemuan.date);
+        if(dataPertemuan.status === 1){
+          sheet.sheetData[1].data[2].push('Completed');
+          sheet.sheetData[1].data[3].push('-');
+        }else if(dataPertemuan.status === -1){
+          sheet.sheetData[1].data[2].push('Cancelled');
+          sheet.sheetData[1].data[3].push(dataPertemuan.cancelling);
+        }else{
+          sheet.sheetData[1].data[2].push('Pending');
+          sheet.sheetData[1].data[3].push('-');
+        }
+        sheet.sheetData[1].data[4].push(dataPertemuan.keterangan);
+      }
+      JSONArray.push(sheet);
+    }
+    /*
+     JSONArray format:
+    [
+        {
+            sheetName:'sheet1',
+            sheetData:[
+                {
+                    columns: [],
+                    data: [ [],[] ]
+                },
+                {
+                    ysteps: 5,
+                    columns: [],
+                    data: [ [],[] ]
+                }
+            ]
+        },
+        {
+            sheetName: 'sheet2',
+            sheetData:[
+                {
+                    columns: [],
+                    data: [ [],[] ]
+                },
+                {
+                    ysteps: 5,
+                    columns: [],
+                    data: [ [],[] ]
+                }
+            ]
+        }
+    ]
+    */
+    console.log('ini datanya : '+JSON.stringify(JSONArray));
+    yield put({type:'REPORT_SRC', reportSrc:JSONArray});
+  }catch(error){
+    let errorMessage = 'Terjadi Kesalahan Report: ' + error.message;
+    yield put({type: 'MESSAGE', variation: 'error', content: errorMessage});
+  }
+}
+
 export default function* rootSaga() {
   yield all([
     takeLatest('SIGN_IN', signIn),
@@ -237,6 +336,7 @@ export default function* rootSaga() {
     takeLatest('BUTTON_1', options1Execute),
     // takeLatest('BUTTON_2', options2Execute),
     takeLatest('COURSE_DETAIL',queryCourseDtl),
-    takeLatest('SAVE_SESSION',saveSession)
+    takeLatest('SAVE_SESSION',saveSession),
+    takeLatest('PRINT_ALL',printAll),
   ]);
 }

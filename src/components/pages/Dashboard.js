@@ -19,6 +19,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import cJSON from 'circular-json';
 
 import {queryCourseList,handlePopup,setSelectedCourseId} from '../../store/Actions';
 import { connect } from 'react-redux';
@@ -163,6 +164,7 @@ class CustomPaginationActionsTable extends React.Component {
     console.log('Loading Status = '+loading);
     if(rows){
       const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+      console.log('rowsData = '+cJSON.stringify(rows));
       // let namaMurid = [];
       // for(let row of rows){
       //   let namaMuridPerRow = [];

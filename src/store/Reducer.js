@@ -41,7 +41,11 @@ const initialState = {
     openEditor:false,
     selectedCourse:null,
     courseBundle:[],
-    courseDtlQueried:false
+    courseDtlQueried:false,
+
+    //report files
+    reportSrc:[],
+    isReportReady: false,
 }
 
 function reducer(state = initialState, action){
@@ -185,7 +189,13 @@ function reducer(state = initialState, action){
                 ...state,
                 popupOptions2: action.popupOptions2,
                 popupTitle: action.optionTitle
-            }        
+            }
+        case 'REPORT_SRC':
+            return{
+                ...state,
+                reportSrc : action.reportSrc,
+                isReportReady: true,
+            }     
         default:
           return state;
     }

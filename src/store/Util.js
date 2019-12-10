@@ -1,6 +1,5 @@
 
 import React from 'react';
-import {ExcelFile,ExcelSheet} from 'react-data-export';
 
 export const SISWA = 0;
 export const GURU = 1;
@@ -45,47 +44,7 @@ export function arrayToString(arr,type) {
     return pilihanStr;
   }
 
-export function createReport({JSONArray}){
-    /*
-    JSONArray format:
-    [
-        {
-            sheetName:'sheet1',
-            sheetData:[
-                {
-                    columns: [],
-                    data: [ [],[] ]
-                },
-                {
-                    ysteps: 5,
-                    columns: [],
-                    data: [ [],[] ]
-                }
-            ]
-        },
-        {
-            sheetName: 'sheet2',
-            sheetData:[
-                {
-                    columns: [],
-                    data: [ [],[] ]
-                },
-                {
-                    ysteps: 5,
-                    columns: [],
-                    data: [ [],[] ]
-                }
-            ]
-        }
-    ]
-    */
-    return(
-        <ExcelFile>
-            {
-                JSONArray.map((sheet)=>(
-                    <ExcelSheet dataSet={sheet.sheetData} name = {sheet.sheetName}/>
-                ))
-            }
-        </ExcelFile>
-    )
+export function createJSONArrayReport(){
+    
 }
+

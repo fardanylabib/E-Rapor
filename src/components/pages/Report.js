@@ -6,11 +6,12 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {queryCourseList} from '../../store/Actions';
+import {queryCourseList,printAll} from '../../store/Actions';
 import Typography from '@material-ui/core/Typography';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
+import {ExcelFile,ExcelSheet} from 'react-data-export';
 
 const styles = {
   from: {
@@ -32,9 +33,11 @@ class Report extends React.Component {
     
     dispatchReport = ()=>{
         if(this.props.reportClass === 'Laporan Kehadiran'){
-            this.props.queryCourseList(this.props.isAdmin,this.props.email);
             if(this.state.isPrintAll=='1'){
-                
+                if(this.props.courses === null){
+                    this.props.queryCourseList(this.props.isAdmin,this.props.email);
+                }
+                this.props.printAll(this.props.courses);
             }else{
     
             }
@@ -49,7 +52,7 @@ class Report extends React.Component {
         }
         this.setState({
             dateFrom : today.getFullYear() + '-' + month + '-' + today.getDate(),
-            dateThru : today.getFullYear() + '-' + month + '-' + today.getDate()
+            dateThru : today.getFullYear() + '-' + month + '-' + today.getDate(),
         });
     }
 
@@ -67,16 +70,16 @@ class Report extends React.Component {
                     <Typography variant='h5' >Laporan&nbsp;{reportName} </Typography>
                     <Grid container alignItems='center' justify="space-evenly">
                         <Grid item>
-                        <TextField autoFocus margin='dense' id = 'start' className = {classes.from}
-                            label='Dari' type='date'
-                            value = {dateFrom}
-                            onChange={e => this.setState({ dateFrom: e.target.value })}
-                        />  
-                        <TextField autoFocus margin='dense' id = 'to' className = {classes.from}
-                            label='Sampai' type='date'
-                            value = {dateThru}
-                            onChange={e => this.setState({ dateThru: e.target.value })}
-                        />  
+                            <TextField autoFocus margin='dense' id = 'start' className = {classes.from}
+                                label='Dari' type='date'
+                                value = {dateFrom}
+                                onChange={e => this.setState({ dateFrom: e.target.value })}
+                            />  
+                            <TextField autoFocus margin='dense' id = 'to' className = {classes.from}
+                                label='Sampai' type='date'
+                                value = {dateThru}
+                                onChange={e => this.setState({ dateThru: e.target.value })}
+                            />  
                         </Grid>  
                         <Grid item>
                             <RadioGroup
@@ -98,6 +101,17 @@ class Report extends React.Component {
                             </Button>
                         </Grid>
                     </Grid>
+                    {
+                        this.props.isReportReady ?
+                        <ExcelFile>
+                            {
+                                this.props.reportSrc.map((sheet)=>(
+                                    <ExcelSheet dataSet={sheet.sheetData} name = {sheet.sheetName}/>
+                                ))
+                            }
+                        </ExcelFile>
+                        :null
+                    }
                 </div>
             );
         }    
@@ -115,10 +129,13 @@ const mapStateToProps = (state) => {
         reportName: state.popupTitle,
         reportClass : state.popupOptions2,
         isAdmin: state.isAdmin,
-        email: state.email
+        email: state.email,
+        courses: state.rows,
+        reportSrc: state.reportSrc,
+        isReportReady: state.isReportReady
       }
 }
 const mapDispatchToProps = (dispatch) => {
-    return bindActionCreators({queryCourseList},dispatch);
+    return bindActionCreators({queryCourseList, printAll},dispatch);
   }
 export default connect(mapStateToProps,mapDispatchToProps)(withStyles(styles)(Report));

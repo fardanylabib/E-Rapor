@@ -17,7 +17,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import { connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {simpanSesi,closeEditor,queryCourseDetail,openMessage,nextStep,prevStep} from '../../store/Actions';
+import {simpanSesi,closeEditor,openMessage,nextStep,prevStep} from '../../store/Actions';
 import InfiniteCalendar from 'react-infinite-calendar';
 import MasonryLayout from 'react-masonry-layout'
 
@@ -312,7 +312,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({simpanSesi,closeEditor,queryCourseDetail,openMessage,nextStep,prevStep},dispatch);
+  return bindActionCreators({simpanSesi,closeEditor,openMessage,nextStep,prevStep},dispatch);
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(EditSesiWindow);
